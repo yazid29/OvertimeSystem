@@ -19,6 +19,7 @@ namespace API.Models
         [Column("document", TypeName = "nvarchar(255)")]
         public string Document { get; set; } = string.Empty;
         //cardinality
-        public OvertimeRequest? OvertimeRequest { get; set; }
+        public Account? Account { get; set; }
+        public ICollection<OvertimeRequest>? OvertimeRequest { get; set; }
     }
 }
