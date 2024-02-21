@@ -18,5 +18,7 @@ namespace API.Models
         public string Status { get; set; } = string.Empty;
         [Column("document", TypeName = "nvarchar(255)")]
         public string Document { get; set; } = string.Empty;
+        //cardinality
+        public OvertimeRequest? OvertimeRequest { get; set; }
     }
 }

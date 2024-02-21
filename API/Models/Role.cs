@@ -10,5 +10,8 @@ namespace API.Models
         public Guid Id { get; set; }
         [Column("name", TypeName = "nvarchar(25)")]
         public string Name { get; set; } = string.Empty;
+
+        // Cardinality
+        public ICollection<AccountRole>? AccoutRoles { get; set; }
     }
 }

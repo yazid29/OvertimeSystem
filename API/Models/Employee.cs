@@ -27,5 +27,11 @@ namespace API.Models
         public string Department { get; set; } = string.Empty;
         [Column("manager_id", TypeName = "char(36)")]
         public Guid? ManagerId { get; set; }
+        
+        // Cardinality
+        public Account? Account { get; set; }
+        public Employee? Manager { get; set; }
+        public ICollection<Employee>? Employees { get; set; }
+
     }
 }

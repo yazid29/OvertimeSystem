@@ -12,5 +12,8 @@ namespace API.Models
         public Guid AccountId { get; set; }
         [Column("role_id", TypeName = "char(36)")]
         public Guid RoleId { get; set; }
+        // Cardinality
+        public Account? Account { get; set; }
+        public Role? Role { get; set; }
     }
 }
