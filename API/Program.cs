@@ -18,7 +18,12 @@ builder.Services.AddDbContext<OvertimeServiceDbContext>(option =>
 });
 
 // Add repository to the container
+builder.Services.AddScoped<IAccountRepository, IAccountRepository>();
+builder.Services.AddScoped<IAccountRoleRepository, IAccountRoleRepository>();
 builder.Services.AddScoped<IEmployeeRepository, IEmployeeRepository>();
+builder.Services.AddScoped<IOvertimeRepository, IOvertimeRepository>();
+builder.Services.AddScoped<IOvertimeRequestRepository, IOvertimeRequestRepository>();
+builder.Services.AddScoped<IRoleRepository, IRoleRepository>();
 
 //build app
 var app = builder.Build();

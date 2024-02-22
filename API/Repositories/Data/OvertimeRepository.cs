@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories.Data
 {
-    public class EmployeeRepository : GeneralRepository<Employee>, IEmployeeRepository
+    public class OvertimeRepository : GeneralRepository<Overtime>, IOvertimeRepository
     {
-        public EmployeeRepository(OvertimeServiceDbContext context) : base(context)
+        public OvertimeRepository(OvertimeServiceDbContext context) : base(context)
         {
         }
     }
