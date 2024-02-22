@@ -13,10 +13,10 @@ public class GeneralRepository<TEntity> : IGeneralRepository<TEntity> where TEnt
     {
         _context = context;
     }
-    public OvertimeServiceDbContext GetContext()
-    {
-        return _context;
-    }
+    //public OvertimeServiceDbContext GetContext()
+    //{
+    //    return _context;
+    //}
     public async Task<IEnumerable<TEntity>> GettAllAsync()
     {
         return await _context.Set<TEntity>().ToListAsync();

@@ -5,8 +5,8 @@ namespace API.Contracts;
 
 public interface IGeneralRepository<TEntity>
 {
-    OvertimeServiceDbContext GetContext();
-    Task<IEnumerable<TEntity>> GettAllAsync();
+    //OvertimeServiceDbContext GetContext();
+    Task<IEnumerable<TEntity>> GetAllAsync();
     Task<TEntity?> GetByIdAsync(Guid id);
     Task<TEntity> CreateAsync(TEntity entity);
     Task UpdateAsync(TEntity entity);

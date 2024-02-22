@@ -1,5 +1,7 @@
 using API.Data;
 using API.Repositories.Interfaces;
+using API.Services;
+using API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,14 @@ builder.Services.AddScoped<IEmployeeRepository, IEmployeeRepository>();
 builder.Services.AddScoped<IOvertimeRepository, IOvertimeRepository>();
 builder.Services.AddScoped<IOvertimeRequestRepository, IOvertimeRequestRepository>();
 builder.Services.AddScoped<IRoleRepository, IRoleRepository>();
+
+// Add Service to the container
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IAccountRoleService, AccountRoleService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IOvertimeRequestService, OvertimeRequestService>();
+builder.Services.AddScoped<IOvertimeService, OvertimeService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 //build app
 var app = builder.Build();
