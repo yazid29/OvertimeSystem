@@ -17,7 +17,7 @@ public class GeneralRepository<TEntity> : IGeneralRepository<TEntity> where TEnt
     //{
     //    return _context;
     //}
-    public async Task<IEnumerable<TEntity>> GettAllAsync()
+    public async Task<IEnumerable<TEntity>> GetAllAsync()
     {
         return await _context.Set<TEntity>().ToListAsync();
     }

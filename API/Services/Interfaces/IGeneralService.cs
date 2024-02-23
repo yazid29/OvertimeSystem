@@ -3,12 +3,12 @@ using API.Repositories.Interfaces;
 
 namespace API.Services.Interfaces
 {
-    public interface IGeneralService
+    public interface IGeneralService<TEntityRepo,TEntity>
     {
-        //Task<IEnumerable<Employee>?> GetAllAsync();
-        //Task<Employee?> GetByIdAsync(Guid id);
-        //Task<int> CreateAsync(Employee employee);
-        //Task<int> UpdateAsync(Guid id, Employee employee);
-        //Task<int> DeleteAsync(Guid id);
+        Task<IEnumerable<TEntity>?> GetAllAsync();
+        Task<TEntity?> GetByIdAsync(Guid id);
+        Task<int> CreateAsync(TEntity entity);
+        Task<int> UpdateAsync(Guid id, TEntity entity);
+        Task<int> DeleteAsync(Guid id);
     }
 }

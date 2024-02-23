@@ -1,12 +1,18 @@
-﻿using API.Models;
+﻿using API.Contracts;
+using API.Models;
+using API.Repositories;
 using API.Repositories.Data;
 using API.Repositories.Interfaces;
 using API.Services.Interfaces;
 
 namespace API.Services
 {
+    //public class AccountService : GeneralService<IGeneralRepository<Account>, Account>
     public class AccountService : IAccountService
     {
+        //public AccountService(IGeneralRepository<Account> repository) : base(repository)
+        //{
+        //}
         private readonly IAccountRepository _accountRoleRepository;
 
         public AccountService(IAccountRepository repo)
