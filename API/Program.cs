@@ -1,7 +1,9 @@
 using API.Data;
+using API.Repositories.Data;
 using API.Repositories.Interfaces;
 using API.Services;
 using API.Services.Interfaces;
+using API.Utilities.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -14,6 +16,10 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddTransient<ErrorHandlingMiddleware>();
+// Add Automapper
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
 // Add database Context
 var connectionString = builder.Configuration.GetConnectionString("SqlConnections");
 builder.Services.AddDbContext<OvertimeServiceDbContext>(option =>
@@ -22,12 +28,12 @@ builder.Services.AddDbContext<OvertimeServiceDbContext>(option =>
 });
 
 // Add repository to the container
-builder.Services.AddScoped<IAccountRepository, IAccountRepository>();
-builder.Services.AddScoped<IAccountRoleRepository, IAccountRoleRepository>();
-builder.Services.AddScoped<IEmployeeRepository, IEmployeeRepository>();
-builder.Services.AddScoped<IOvertimeRepository, IOvertimeRepository>();
-builder.Services.AddScoped<IOvertimeRequestRepository, IOvertimeRequestRepository>();
-builder.Services.AddScoped<IRoleRepository, IRoleRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountRoleRepository, AccountRoleRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IOvertimeRepository, OvertimeRepository>();
+builder.Services.AddScoped<IOvertimeRequestRepository, OvertimeRequestRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
 // Add Service to the container
 builder.Services.AddScoped<IAccountService, AccountService>();
@@ -49,6 +55,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

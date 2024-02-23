@@ -30,7 +30,9 @@ public class GeneralRepository<TEntity> : IGeneralRepository<TEntity> where TEnt
 
     public async Task<TEntity?> GetByIdAsync(Guid id)
     {
-        return await _context.Set<TEntity>().FindAsync(id);
+        var entity = await _context.Set<TEntity>().FindAsync(id);
+        _context.ChangeTracker.Clear();
+        return entity;
     }
 
     public async Task UpdateAsync(TEntity entity)
