@@ -1,13 +1,13 @@
-﻿using API.Models;
+﻿using API.DTOs.Accounts;
 
 namespace API.Services.Interfaces
 {
     public interface IAccountService
     {
-        Task<IEnumerable<Account>?> GetAllAsync();
-        Task<Account?> GetByIdAsync(Guid id);
-        Task<int> CreateAsync(Account employee);
-        Task<int> UpdateAsync(Guid id, Account employee);
+        Task<IEnumerable<AccountResponseDto>?> GetAllAsync();
+        Task<AccountResponseDto?> GetByIdAsync(Guid id);
+        Task<int> CreateAsync(AccountRequestDto entity);
+        Task<int> UpdateAsync(Guid id, AccountRequestDto entity);
         Task<int> DeleteAsync(Guid id);
     }
 }

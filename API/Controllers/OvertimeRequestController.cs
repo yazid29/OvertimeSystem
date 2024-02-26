@@ -1,6 +1,8 @@
-﻿using API.Models;
+﻿using API.DTOs.OvertimeRequests;
 using API.Services.Interfaces;
+using API.Utilities.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 [ApiController]
 [Route("overtimeRequest")]
@@ -20,10 +22,15 @@ public class OvertimeRequestController : ControllerBase
 
         if (!results.Any())
         {
-            return NotFound("Data Not Found"); // Data Not Found
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Data Employee Not Found")); // Data Not Found
         }
 
-        return Ok(results);
+        return Ok(new ListResponseVM<OvertimeReqResponseDto>(StatusCodes.Status200OK,
+                                               HttpStatusCode.OK.ToString(),
+                                               "Data Employee Found",
+                                               results.ToList()));
     }
 
     [HttpGet("{id}")]
@@ -33,31 +40,42 @@ public class OvertimeRequestController : ControllerBase
 
         if (result is null)
         {
-            return NotFound("Data Not Found"); // Data Not Found
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Employee Not Found")); // Data Not Found
         }
 
-        return Ok(result);
+        return Ok(new SingleResponseVM<OvertimeReqResponseDto>(StatusCodes.Status200OK,
+                                               HttpStatusCode.OK.ToString(),
+                                               "Data Employee Found",
+                                               result));
     }
-
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(OvertimeRequest entity)
+    public async Task<IActionResult> CreateAsync(OvertimeReqRequestDto entity)
     {
         var result = await _aService.CreateAsync(entity);
 
-        return Ok("OvertimeRequest Created");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Employee Created"));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, OvertimeRequest entity)
+    public async Task<IActionResult> UpdateAsync(Guid id, OvertimeReqRequestDto entity)
     {
         var result = await _aService.UpdateAsync(id, entity);
 
         if (result == 0)
         {
-            return NotFound("Id not found!");
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Employee Not Found"
+            )); // Data Not Found
         }
 
-        return Ok("OvertimeRequest Updated");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Employee Updated"));
     }
 
     [HttpDelete("{id}")]
@@ -67,9 +85,14 @@ public class OvertimeRequestController : ControllerBase
 
         if (result == 0)
         {
-            return NotFound("Id not found!");
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Employee Not Found"
+                                                 )); // Data Not Found
         }
 
-        return Ok("OvertimeRequest Deleted");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Employee Deleted"));
     }
 }

@@ -1,75 +1,99 @@
-﻿using API.Models;
+﻿using API.DTOs.Roles;
 using API.Services.Interfaces;
+using API.Utilities.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 [ApiController]
 [Route("role")]
 public class RoleController : ControllerBase
 {
-    private readonly IRoleService _service;
+    private readonly IRoleService _aService;
 
     public RoleController(IRoleService roleService)
     {
-        _service = roleService;
+        _aService = roleService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllAsync()
     {
-        var results = await _service.GetAllAsync();
+        var results = await _aService.GetAllAsync();
 
         if (!results.Any())
         {
-            return NotFound("Data Not Found"); // Data Not Found
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Data Account Not Found")); // Data Not Found
         }
 
-        return Ok(results);
+        return Ok(new ListResponseVM<RoleResponseDto>(StatusCodes.Status200OK,
+                                               HttpStatusCode.OK.ToString(),
+                                               "Data Account Found",
+                                               results.ToList()));
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetByIdAsync(Guid id)
     {
-        var result = await _service.GetByIdAsync(id);
+        var result = await _aService.GetByIdAsync(id);
 
         if (result is null)
         {
-            return NotFound("Data Not Found"); // Data Not Found
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Account Not Found")); // Data Not Found
         }
 
-        return Ok(result);
+        return Ok(new SingleResponseVM<RoleResponseDto>(StatusCodes.Status200OK,
+                                               HttpStatusCode.OK.ToString(),
+                                               "Data Account Found",
+                                               result));
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(Role entity)
+    public async Task<IActionResult> CreateAsync(RoleRequestDto entity)
     {
-        var result = await _service.CreateAsync(entity);
+        var result = await _aService.CreateAsync(entity);
 
-        return Ok("Role Created");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Created"));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, Role entity)
+    public async Task<IActionResult> UpdateAsync(Guid id, RoleRequestDto entity)
     {
-        var result = await _service.UpdateAsync(id, entity);
+        var result = await _aService.UpdateAsync(id, entity);
 
         if (result == 0)
         {
-            return NotFound("Id not found!");
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Account Not Found"
+            )); // Data Not Found
         }
 
-        return Ok("Role Updated");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Updated"));
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {
-        var result = await _service.DeleteAsync(id);
+        var result = await _aService.DeleteAsync(id);
 
         if (result == 0)
         {
-            return NotFound("Id not found!");
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Account Not Found"
+                                                 )); // Data Not Found
         }
 
-        return Ok("Role Deleted");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Deleted"));
     }
 }

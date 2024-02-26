@@ -1,25 +1,27 @@
-﻿using API.Models;
-using API.Repositories.Data;
+﻿using API.DTOs.OvertimeRequests;
+using API.Models;
 using API.Repositories.Interfaces;
 using API.Services.Interfaces;
+using AutoMapper;
 
 namespace API.Services
 {
     public class OvertimeRequestService : IOvertimeRequestService
     {
         private readonly IOvertimeRequestRepository _overtimeRepository;
-
+        private readonly IMapper _mapper;
         public OvertimeRequestService(IOvertimeRequestRepository overtimeRepository)
         {
             _overtimeRepository = overtimeRepository;
         }
 
-        public async Task<IEnumerable<OvertimeRequest>?> GetAllAsync()
+        public async Task<IEnumerable<OvertimeReqResponseDto>?> GetAllAsync()
         {
             try
             {
                 var data = await _overtimeRepository.GetAllAsync();
-                return data; //success
+                var dataMap = _mapper.Map<IEnumerable<OvertimeReqResponseDto>>(data);
+                return dataMap; //success
             }
             catch (Exception ex)
             {
@@ -29,12 +31,13 @@ namespace API.Services
         }
 
 
-        public async Task<OvertimeRequest?> GetByIdAsync(Guid id)
+        public async Task<OvertimeReqResponseDto?> GetByIdAsync(Guid id)
         {
             try
             {
                 var data = await _overtimeRepository.GetByIdAsync(id);
-                return data;
+                var dataMap = _mapper.Map<OvertimeReqResponseDto>(data);
+                return dataMap;
             }
             catch (Exception ex)
             {
@@ -43,11 +46,12 @@ namespace API.Services
             }
         }
 
-        public async Task<int> CreateAsync(OvertimeRequest employee)
+        public async Task<int> CreateAsync(OvertimeReqRequestDto entity)
         {
             try
             {
-                await _overtimeRepository.CreateAsync(employee);
+                var dataMap = _mapper.Map<OvertimeRequest>(entity);
+                await _overtimeRepository.CreateAsync(dataMap);
 
                 return 1;
             }
@@ -58,7 +62,7 @@ namespace API.Services
             }
         }
 
-        public async Task<int> UpdateAsync(Guid id, OvertimeRequest employee)
+        public async Task<int> UpdateAsync(Guid id, OvertimeReqRequestDto entity)
         {
             try
             {
@@ -67,7 +71,9 @@ namespace API.Services
                 {
                     return 0;
                 }
-                await _overtimeRepository.UpdateAsync(employee);
+                var dataMap = _mapper.Map<OvertimeRequest>(entity);
+                dataMap.Id = id;
+                await _overtimeRepository.UpdateAsync(dataMap);
                 return 1;
             }
             catch (Exception ex)

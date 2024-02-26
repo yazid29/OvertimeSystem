@@ -1,25 +1,27 @@
-﻿using API.Models;
-using API.Repositories.Data;
+﻿using API.DTOs.Roles;
+using API.Models;
 using API.Repositories.Interfaces;
 using API.Services.Interfaces;
+using AutoMapper;
 
 namespace API.Services
 {
     public class RoleService : IRoleService
     {
         private readonly IRoleRepository _roleRepository;
-
+        private readonly IMapper _mapper;
         public RoleService(IRoleRepository roleRepository)
         {
             _roleRepository = roleRepository;
         }
 
-        public async Task<IEnumerable<Role>?> GetAllAsync()
+        public async Task<IEnumerable<RoleResponseDto>?> GetAllAsync()
         {
             try
             {
                 var data = await _roleRepository.GetAllAsync();
-                return data; //success
+                var dataMap = _mapper.Map<IEnumerable<RoleResponseDto>>(data);
+                return dataMap; //success
             }
             catch (Exception ex)
             {
@@ -29,12 +31,13 @@ namespace API.Services
         }
 
 
-        public async Task<Role?> GetByIdAsync(Guid id)
+        public async Task<RoleResponseDto?> GetByIdAsync(Guid id)
         {
             try
             {
                 var data = await _roleRepository.GetByIdAsync(id);
-                return data;
+                var dataMap = _mapper.Map<RoleResponseDto>(data);
+                return dataMap;
             }
             catch (Exception ex)
             {
@@ -43,11 +46,12 @@ namespace API.Services
             }
         }
 
-        public async Task<int> CreateAsync(Role employee)
+        public async Task<int> CreateAsync(RoleRequestDto entity)
         {
             try
             {
-                await _roleRepository.CreateAsync(employee);
+                var dataMap = _mapper.Map<Role>(entity);
+                await _roleRepository.CreateAsync(dataMap);
 
                 return 1;
             }
@@ -58,7 +62,7 @@ namespace API.Services
             }
         }
 
-        public async Task<int> UpdateAsync(Guid id, Role employee)
+        public async Task<int> UpdateAsync(Guid id, RoleRequestDto entity)
         {
             try
             {
@@ -67,7 +71,9 @@ namespace API.Services
                 {
                     return 0;
                 }
-                await _roleRepository.UpdateAsync(employee);
+                var dataMap = _mapper.Map<Role>(entity);
+                dataMap.Id = id;
+                await _roleRepository.UpdateAsync(dataMap);
                 return 1;
             }
             catch (Exception ex)

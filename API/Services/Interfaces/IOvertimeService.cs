@@ -1,13 +1,13 @@
-﻿using API.Models;
+﻿using API.DTOs.Overtimes;
 
 namespace API.Services.Interfaces
 {
     public interface IOvertimeService
     {
-        Task<IEnumerable<Overtime>?> GetAllAsync();
-        Task<Overtime?> GetByIdAsync(Guid id);
-        Task<int> CreateAsync(Overtime employee);
-        Task<int> UpdateAsync(Guid id, Overtime employee);
+        Task<IEnumerable<OvertimeResponseDto>?> GetAllAsync();
+        Task<OvertimeResponseDto?> GetByIdAsync(Guid id);
+        Task<int> CreateAsync(OvertimeRequestDto entity);
+        Task<int> UpdateAsync(Guid id, OvertimeRequestDto entity);
         Task<int> DeleteAsync(Guid id);
     }
 }

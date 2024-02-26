@@ -1,6 +1,8 @@
-﻿using API.Models;
+﻿using API.DTOs.AccountRoles;
 using API.Services.Interfaces;
+using API.Utilities.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 [ApiController]
 [Route("accountrole")]
@@ -20,10 +22,15 @@ public class AccountRoleController : ControllerBase
 
         if (!results.Any())
         {
-            return NotFound("Data Not Found"); // Data Not Found
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Data Account Not Found")); // Data Not Found
         }
 
-        return Ok(results);
+        return Ok(new ListResponseVM<AccountRoleResponseDto>(StatusCodes.Status200OK,
+                                               HttpStatusCode.OK.ToString(),
+                                               "Data Account Found",
+                                               results.ToList()));
     }
 
     [HttpGet("{id}")]
@@ -33,31 +40,43 @@ public class AccountRoleController : ControllerBase
 
         if (result is null)
         {
-            return NotFound("Data Not Found"); // Data Not Found
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Account Not Found")); // Data Not Found
         }
 
-        return Ok(result);
+        return Ok(new SingleResponseVM<AccountRoleResponseDto>(StatusCodes.Status200OK,
+                                               HttpStatusCode.OK.ToString(),
+                                               "Data Account Found",
+                                               result));
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(AccountRole accRole)
+    public async Task<IActionResult> CreateAsync(AccountRoleRequestDto account)
     {
-        var result = await _aService.CreateAsync(accRole);
+        var result = await _aService.CreateAsync(account);
 
-        return Ok("AccountRole Created");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Created"));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, AccountRole accRole)
+    public async Task<IActionResult> UpdateAsync(Guid id, AccountRoleRequestDto account)
     {
-        var result = await _aService.UpdateAsync(id, accRole);
+        var result = await _aService.UpdateAsync(id, account);
 
         if (result == 0)
         {
-            return NotFound("Id not found!");
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Account Not Found"
+            )); // Data Not Found
         }
 
-        return Ok("AccountRole Updated");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Updated"));
     }
 
     [HttpDelete("{id}")]
@@ -67,9 +86,14 @@ public class AccountRoleController : ControllerBase
 
         if (result == 0)
         {
-            return NotFound("Id not found!");
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Account Not Found"
+                                                 )); // Data Not Found
         }
 
-        return Ok("Employee Deleted");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Deleted"));
     }
 }

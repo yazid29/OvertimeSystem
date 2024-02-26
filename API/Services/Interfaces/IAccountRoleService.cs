@@ -1,13 +1,12 @@
-﻿using API.Models;
-
+﻿using API.DTOs.AccountRoles;
 namespace API.Services.Interfaces
 {
     public interface IAccountRoleService
     {
-        Task<IEnumerable<AccountRole>?> GetAllAsync();
-        Task<AccountRole?> GetByIdAsync(Guid id);
-        Task<int> CreateAsync(AccountRole employee);
-        Task<int> UpdateAsync(Guid id, AccountRole employee);
+        Task<IEnumerable<AccountRoleResponseDto>?> GetAllAsync();
+        Task<AccountRoleResponseDto?> GetByIdAsync(Guid id);
+        Task<int> CreateAsync(AccountRoleRequestDto entity);
+        Task<int> UpdateAsync(Guid id, AccountRoleRequestDto entity);
         Task<int> DeleteAsync(Guid id);
     }
 }

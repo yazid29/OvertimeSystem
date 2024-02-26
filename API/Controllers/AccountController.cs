@@ -1,6 +1,10 @@
-﻿using API.Models;
+﻿using API.DTOs;
+using API.DTOs.Accounts;
+using API.Models;
 using API.Services.Interfaces;
+using API.Utilities.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 [ApiController]
 [Route("account")]
@@ -20,10 +24,15 @@ public class AccountController : ControllerBase
 
         if (!results.Any())
         {
-            return NotFound("Data Not Found"); // Data Not Found
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Data Account Not Found")); // Data Not Found
         }
 
-        return Ok(results);
+        return Ok(new ListResponseVM<AccountResponseDto>(StatusCodes.Status200OK,
+                                               HttpStatusCode.OK.ToString(),
+                                               "Data Account Found",
+                                               results.ToList()));
     }
 
     [HttpGet("{id}")]
@@ -33,31 +42,43 @@ public class AccountController : ControllerBase
 
         if (result is null)
         {
-            return NotFound("Data Not Found"); // Data Not Found
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Account Not Found")); // Data Not Found
         }
 
-        return Ok(result);
+        return Ok(new SingleResponseVM<AccountResponseDto>(StatusCodes.Status200OK,
+                                               HttpStatusCode.OK.ToString(),
+                                               "Data Account Found",
+                                               result));
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(Account account)
+    public async Task<IActionResult> CreateAsync(AccountRequestDto account)
     {
         var result = await _aService.CreateAsync(account);
 
-        return Ok("Account Created");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Created"));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, Account account)
+    public async Task<IActionResult> UpdateAsync(Guid id, AccountRequestDto account)
     {
         var result = await _aService.UpdateAsync(id, account);
 
         if (result == 0)
         {
-            return NotFound("Id not found!");
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Account Not Found"
+            )); // Data Not Found
         }
 
-        return Ok("Account Updated");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Updated"));
     }
 
     [HttpDelete("{id}")]
@@ -67,9 +88,14 @@ public class AccountController : ControllerBase
 
         if (result == 0)
         {
-            return NotFound("Id not found!");
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Account Not Found"
+                                                 )); // Data Not Found
         }
 
-        return Ok("Employee Deleted");
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Deleted"));
     }
 }

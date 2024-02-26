@@ -1,9 +1,8 @@
-﻿using API.Contracts;
+﻿using API.DTOs.Accounts;
 using API.Models;
-using API.Repositories;
-using API.Repositories.Data;
 using API.Repositories.Interfaces;
 using API.Services.Interfaces;
+using AutoMapper;
 
 namespace API.Services
 {
@@ -14,17 +13,19 @@ namespace API.Services
         //{
         //}
         private readonly IAccountRepository _accountRoleRepository;
+        private readonly IMapper _mapper;
 
         public AccountService(IAccountRepository repo)
         {
             _accountRoleRepository = repo;
         }
-        public async Task<IEnumerable<Account>?> GetAllAsync()
+        public async Task<IEnumerable<AccountResponseDto>?> GetAllAsync()
         {
             try
             {
                 var data = await _accountRoleRepository.GetAllAsync();
-                return data; //success
+                var dataMap = _mapper.Map<IEnumerable<AccountResponseDto>>(data);
+                return dataMap; //success
             }
             catch (Exception ex)
             {
@@ -34,12 +35,13 @@ namespace API.Services
         }
 
 
-        public async Task<Account?> GetByIdAsync(Guid id)
+        public async Task<AccountResponseDto?> GetByIdAsync(Guid id)
         {
             try
             {
                 var data = await _accountRoleRepository.GetByIdAsync(id);
-                return data;
+                var dataMap = _mapper.Map<AccountResponseDto>(data);
+                return dataMap;
             }
             catch (Exception ex)
             {
@@ -48,11 +50,12 @@ namespace API.Services
             }
         }
 
-        public async Task<int> CreateAsync(Account employee)
+        public async Task<int> CreateAsync(AccountRequestDto entity)
         {
             try
             {
-                await _accountRoleRepository.CreateAsync(employee);
+                var data = _mapper.Map<Account>(entity);
+                await _accountRoleRepository.CreateAsync(data);
 
                 return 1;
             }
@@ -63,7 +66,7 @@ namespace API.Services
             }
         }
 
-        public async Task<int> UpdateAsync(Guid id, Account employee)
+        public async Task<int> UpdateAsync(Guid id, AccountRequestDto entity)
         {
             try
             {
@@ -72,7 +75,9 @@ namespace API.Services
                 {
                     return 0;
                 }
-                await _accountRoleRepository.UpdateAsync(employee);
+                var account = _mapper.Map<Account>(entity);
+                account.Id = id;
+                await _accountRoleRepository.UpdateAsync(account);
                 return 1;
             }
             catch (Exception ex)
