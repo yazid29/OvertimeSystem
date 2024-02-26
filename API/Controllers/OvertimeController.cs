@@ -24,12 +24,12 @@ public class OvertimeController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Data Account Not Found")); // Data Not Found
+                                                  "Data Overtime Not Found")); // Data Not Found
         }
 
         return Ok(new ListResponseVM<OvertimeResponseDto>(StatusCodes.Status200OK,
                                                HttpStatusCode.OK.ToString(),
-                                               "Data Account Found",
+                                               "Data Overtime Found",
                                                results.ToList()));
     }
 
@@ -42,12 +42,12 @@ public class OvertimeController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Account Not Found")); // Data Not Found
+                                                  "Id Overtime Not Found")); // Data Not Found
         }
 
         return Ok(new SingleResponseVM<OvertimeResponseDto>(StatusCodes.Status200OK,
                                                HttpStatusCode.OK.ToString(),
-                                               "Data Account Found",
+                                               "Data Overtime Found",
                                                result));
     }
 
@@ -58,7 +58,7 @@ public class OvertimeController : ControllerBase
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Account Created"));
+                                        "Overtime Created"));
     }
 
     [HttpPut("{id}")]
@@ -70,13 +70,13 @@ public class OvertimeController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Account Not Found"
+                                                  "Id Overtime Not Found"
             )); // Data Not Found
         }
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Account Updated"));
+                                        "Overtime Updated"));
     }
 
     [HttpDelete("{id}")]
@@ -88,12 +88,12 @@ public class OvertimeController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Account Not Found"
+                                                  "Id Overtime Not Found"
                                                  )); // Data Not Found
         }
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Account Deleted"));
+                                        "Overtime Deleted"));
     }
 }

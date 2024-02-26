@@ -24,12 +24,12 @@ public class AccountRoleController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Data Account Not Found")); // Data Not Found
+                                                  "Data AccountRole Not Found")); // Data Not Found
         }
 
         return Ok(new ListResponseVM<AccountRoleResponseDto>(StatusCodes.Status200OK,
                                                HttpStatusCode.OK.ToString(),
-                                               "Data Account Found",
+                                               "Data AccountRole Found",
                                                results.ToList()));
     }
 
@@ -42,12 +42,12 @@ public class AccountRoleController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Account Not Found")); // Data Not Found
+                                                  "Id AccountRole Not Found")); // Data Not Found
         }
 
         return Ok(new SingleResponseVM<AccountRoleResponseDto>(StatusCodes.Status200OK,
                                                HttpStatusCode.OK.ToString(),
-                                               "Data Account Found",
+                                               "Data AccountRole Found",
                                                result));
     }
 
@@ -58,7 +58,7 @@ public class AccountRoleController : ControllerBase
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Account Created"));
+                                        "AccountRole Created"));
     }
 
     [HttpPut("{id}")]
@@ -70,13 +70,13 @@ public class AccountRoleController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Account Not Found"
+                                                  "Id AccountRole Not Found"
             )); // Data Not Found
         }
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Account Updated"));
+                                        "AccountRole Updated"));
     }
 
     [HttpDelete("{id}")]
@@ -88,12 +88,12 @@ public class AccountRoleController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Account Not Found"
+                                                  "Id AccountRole Not Found"
                                                  )); // Data Not Found
         }
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Account Deleted"));
+                                        "AccountRole Deleted"));
     }
 }

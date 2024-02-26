@@ -24,12 +24,12 @@ public class OvertimeRequestController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Data Employee Not Found")); // Data Not Found
+                                                  "Data OvertimeRequest Not Found")); // Data Not Found
         }
 
         return Ok(new ListResponseVM<OvertimeReqResponseDto>(StatusCodes.Status200OK,
                                                HttpStatusCode.OK.ToString(),
-                                               "Data Employee Found",
+                                               "Data OvertimeRequest Found",
                                                results.ToList()));
     }
 
@@ -42,12 +42,12 @@ public class OvertimeRequestController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Employee Not Found")); // Data Not Found
+                                                  "Id OvertimeRequest Not Found")); // Data Not Found
         }
 
         return Ok(new SingleResponseVM<OvertimeReqResponseDto>(StatusCodes.Status200OK,
                                                HttpStatusCode.OK.ToString(),
-                                               "Data Employee Found",
+                                               "Data OvertimeRequest Found",
                                                result));
     }
     [HttpPost]
@@ -57,7 +57,7 @@ public class OvertimeRequestController : ControllerBase
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Employee Created"));
+                                        "OvertimeRequest Created"));
     }
 
     [HttpPut("{id}")]
@@ -69,13 +69,13 @@ public class OvertimeRequestController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Employee Not Found"
+                                                  "Id OvertimeRequest Not Found"
             )); // Data Not Found
         }
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Employee Updated"));
+                                        "OvertimeRequest Updated"));
     }
 
     [HttpDelete("{id}")]
@@ -87,12 +87,12 @@ public class OvertimeRequestController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Employee Not Found"
+                                                  "Id OvertimeRequest Not Found"
                                                  )); // Data Not Found
         }
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Employee Deleted"));
+                                        "OvertimeRequest Deleted"));
     }
 }
