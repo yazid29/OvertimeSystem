@@ -10,9 +10,10 @@ namespace API.Services
     {
         private readonly IAccountRoleRepository _accountRoleRepository;
         private readonly IMapper _mapper;
-        public AccountRoleService(IAccountRoleRepository repo)
+        public AccountRoleService(IAccountRoleRepository repo, IMapper mapper)
         {
             _accountRoleRepository = repo;
+            _mapper = mapper;
         }
         public async Task<IEnumerable<AccountRoleResponseDto>?> GetAllAsync()
         {

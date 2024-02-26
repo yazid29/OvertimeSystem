@@ -15,10 +15,10 @@ namespace API.DTOs
         {
             // Account
             CreateMap<AccountRequestDto, Account>();
-            CreateMap<Account, AccountRequestDto>();
+            CreateMap<Account, AccountResponseDto>();
             // Account Role
             CreateMap<AccountRoleRequestDto, AccountRole>();
-            CreateMap<AccountRole, AccountRoleRequestDto>();
+            CreateMap<AccountRole, AccountRoleResponseDto>();
             // Employee
             CreateMap<EmployeeRequestDto, Employee>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
@@ -27,13 +27,13 @@ namespace API.DTOs
             CreateMap<Employee, EmployeeResponseDto>();
             // Overtime
             CreateMap<OvertimeRequestDto, Overtime>();
-            CreateMap<Overtime, OvertimeRequestDto>();
+            CreateMap<Overtime, OvertimeResponseDto>();
             // Overtime Request
             CreateMap<OvertimeReqRequestDto, OvertimeRequest>();
-            CreateMap<OvertimeRequest, OvertimeReqRequestDto>();
+            CreateMap<OvertimeRequest, OvertimeReqResponseDto>();
             // Role
             CreateMap<RoleRequestDto, Role>();
-            CreateMap<Role, RoleRequestDto>();
+            CreateMap<Role, RoleResponseDto>();
         }
     }
 }

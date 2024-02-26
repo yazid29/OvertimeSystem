@@ -6,18 +6,15 @@ using AutoMapper;
 
 namespace API.Services
 {
-    //public class AccountService : GeneralService<IGeneralRepository<Account>, Account>
     public class AccountService : IAccountService
     {
-        //public AccountService(IGeneralRepository<Account> repository) : base(repository)
-        //{
-        //}
         private readonly IAccountRepository _accountRoleRepository;
         private readonly IMapper _mapper;
 
-        public AccountService(IAccountRepository repo)
+        public AccountService(IAccountRepository repo,IMapper mapper)
         {
             _accountRoleRepository = repo;
+            _mapper = mapper;
         }
         public async Task<IEnumerable<AccountResponseDto>?> GetAllAsync()
         {

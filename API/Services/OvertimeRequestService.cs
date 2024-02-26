@@ -10,9 +10,10 @@ namespace API.Services
     {
         private readonly IOvertimeRequestRepository _overtimeRepository;
         private readonly IMapper _mapper;
-        public OvertimeRequestService(IOvertimeRequestRepository overtimeRepository)
+        public OvertimeRequestService(IOvertimeRequestRepository overtimeRepository, IMapper mapper)
         {
             _overtimeRepository = overtimeRepository;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<OvertimeReqResponseDto>?> GetAllAsync()
