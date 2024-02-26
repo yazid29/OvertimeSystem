@@ -6,6 +6,7 @@
         int Otp,
         DateTime Expired,
         bool IsUsed,
-        bool IsActive
+        bool IsActive,
+        string Role
         );
 }

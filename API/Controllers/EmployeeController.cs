@@ -1,5 +1,4 @@
 ﻿using API.DTOs.Employees;
-using API.Models;
 using API.Services.Interfaces;
 using API.Utilities.ViewModels;
 using Microsoft.AspNetCore.Mvc;

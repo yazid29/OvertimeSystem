@@ -34,7 +34,8 @@ namespace API.DTOs
             CreateMap<OvertimeRequestDto, Overtime>();
             CreateMap<Overtime, OvertimeResponseDto>();
             // Overtime Request
-            CreateMap<OvertimeReqRequestDto, OvertimeRequest>();
+            CreateMap<OvertimeReqRequestDto, OvertimeRequest>()
+                .ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => new DateTime()));
             CreateMap<OvertimeRequest, OvertimeReqResponseDto>();
             // Role
             CreateMap<RoleRequestDto, Role>();

@@ -17,7 +17,7 @@ public class AccountController : ControllerBase
         _aService = accountService;
     }
 
-    [HttpGet]
+    [HttpGet("GetAllAccount")]
     public async Task<IActionResult> GetAllAsync()
     {
         var results = await _aService.GetAllAsync();
