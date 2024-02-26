@@ -14,7 +14,12 @@ namespace API.DTOs
         public MapperProfile() 
         {
             // Account
-            CreateMap<AccountRequestDto, Account>();
+            CreateMap<AccountRequestDto, Account>()
+                .ForMember(dest => dest.Otp, opt => opt.MapFrom(src => 0))
+                .ForMember(dest => dest.Expired, opt => opt.MapFrom(src => new DateTime()))
+                .ForMember(dest => dest.IsUsed, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+
             CreateMap<Account, AccountResponseDto>();
             // Account Role
             CreateMap<AccountRoleRequestDto, AccountRole>();
