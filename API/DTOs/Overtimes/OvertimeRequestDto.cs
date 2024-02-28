@@ -1,10 +1,9 @@
-﻿namespace API.DTOs.Overtimes
+namespace API.DTOs.Overtimes;
+
+public class OvertimeRequestDto
 {
-    public record OvertimeRequestDto(
-        DateTime Date,
-        string Reason,
-        int TotalHours,
-        string Status,
-        string Document
-        );
+    public Guid AccountId { get; init; }
+    public DateTime Date { get; init; }
+    public string Reason { get; init; }
+    public int TotalHours { get; init; }
 }

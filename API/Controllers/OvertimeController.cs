@@ -1,7 +1,12 @@
 ﻿using API.DTOs.Overtimes;
+using API.Services;
 using API.Services.Interfaces;
 using API.Utilities.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Net.Http.Headers;
+using System.IO;
 using System.Net;
 
 [ApiController]
@@ -15,82 +20,106 @@ public class OvertimeController : ControllerBase
         _aService = overtimeService;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAllAsync()
+    [HttpGet("download-document/{id}")]
+    public async Task<IActionResult> DownloadOvertimeDocumentAsync(Guid id)
     {
-        var results = await _aService.GetAllAsync();
+        var result = await _aService.DownloadDocumentAsync(id);
 
-        if (!results.Any())
-        {
-            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
-                                                  HttpStatusCode.NotFound.ToString(),
-                                                  "Data Overtime Not Found")); // Data Not Found
-        }
-
-        return Ok(new ListResponseVM<OvertimeResponseDto>(StatusCodes.Status200OK,
-                                               HttpStatusCode.OK.ToString(),
-                                               "Data Overtime Found",
-                                               results.ToList()));
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetByIdAsync(Guid id)
-    {
-        var result = await _aService.GetByIdAsync(id);
-
-        if (result is null)
-        {
+        if (result.FileDownloadName == "0")
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
                                                   "Id Overtime Not Found")); // Data Not Found
-        }
 
-        return Ok(new SingleResponseVM<OvertimeResponseDto>(StatusCodes.Status200OK,
-                                               HttpStatusCode.OK.ToString(),
-                                               "Data Overtime Found",
-                                               result));
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> CreateAsync(OvertimeRequestDto entity)
-    {
-        var result = await _aService.CreateAsync(entity);
-
-        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
-                                        HttpStatusCode.OK.ToString(),
-                                        "Overtime Created"));
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, OvertimeRequestDto entity)
-    {
-        var result = await _aService.UpdateAsync(id, entity);
-
-        if (result == 0)
-        {
+        if (result.FileDownloadName == "-1")
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Overtime Not Found"
-            )); // Data Not Found
-        }
+                                                  "Document Not Found")); // Data Not Found
+
+        return File(result.Document, result.ContentType, result.FileDownloadName);
+    }
+
+    [HttpPost("approval")]
+    public async Task<IActionResult> ApprovalOvertimeAsync(OvertimeChangeRequestDto overtimeChangeRequestDto)
+    {
+        var result = await _aService.ChangeRequestStatusAsync(overtimeChangeRequestDto);
+        if (result == 0)
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Overtime Not Found")); // Data Not Found
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Overtime Updated"));
+                                        "Overtime Approved"));
     }
 
-    [HttpDelete("{id}")]
+    [HttpPost("request")]
+    public async Task<IActionResult> RequestOvertimeAsync(IFormFile document,
+                                                          [FromForm] OvertimeRequestDto overtimeRequestDto)
+    {
+        var result = await _aService.RequestOvertimeAsync(document, overtimeRequestDto);
+
+        if (result == -1)
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Document Not Found")); // Data Not Found
+
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Overtime Requested"));
+    }
+
+    [HttpGet("details/{accountId}")]
+    public async Task<IActionResult> GetAllDetailAsync(Guid accountId)
+    {
+        var result = await _aService.GetDetailsAsync(accountId);
+
+        if (!result.Any())
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Never Request Overtime")); // Data Not Found
+
+        return Ok(new ListResponseVM<OvertimeDetailResponseDto>(StatusCodes.Status200OK,
+                                                                HttpStatusCode.OK.ToString(),
+                                                                "Data Overtime Found",
+                                                                result.ToList()));
+    }
+
+    [HttpGet("detail/{id}")]
+    public async Task<IActionResult> GetDetailByOvertimeIdAsync(Guid id)
+    {
+        var result = await _aService.GetDetailByOvertimeIdAsync(id);
+
+        if (result is null)
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Overtime Not Found")); // Data Not Found
+
+        return Ok(new SingleResponseVM<OvertimeDetailResponseDto>(StatusCodes.Status200OK,
+                                                                  HttpStatusCode.OK.ToString(),
+                                                                  "Data Overtime Found",
+                                                                  result));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllAsync()
+    {
+        var result = await _aService.GetAllAsync();
+
+        return Ok(new ListResponseVM<OvertimeResponseDto>(StatusCodes.Status200OK,
+                                                          HttpStatusCode.OK.ToString(),
+                                                          "Data Overtime Found",
+                                                          result.ToList()));
+    }
+
+    [HttpDelete]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {
         var result = await _aService.DeleteAsync(id);
 
         if (result == 0)
-        {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Overtime Not Found"
-                                                 )); // Data Not Found
-        }
+                                                  "Id Overtime Not Found")); // Data Not Found
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),

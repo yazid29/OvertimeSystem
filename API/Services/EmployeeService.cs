@@ -78,7 +78,6 @@ namespace API.Services
             try
             {
                 var data = await _employeeRepository.GetByIdAsync(id);
-
                 if (data == null)
                 {
                     return 0; // not found
@@ -87,6 +86,8 @@ namespace API.Services
                 var employee = _mapper.Map<Employee>(employeeRequestDto);
 
                 employee.Id = id;
+                employee.Nik = data.Nik;
+                employee.JoinedDate = data.JoinedDate;
                 await _employeeRepository.UpdateAsync(employee);
 
                 return 1; // success

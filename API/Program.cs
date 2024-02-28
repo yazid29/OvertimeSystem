@@ -5,6 +5,7 @@ using API.Services;
 using API.Services.Interfaces;
 using API.Utilities.Middlewares;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,7 @@ var connectionString = builder.Configuration.GetConnectionString("SqlConnections
 builder.Services.AddDbContext<OvertimeServiceDbContext>(option =>
 {
     option.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    option.UseLazyLoadingProxies();
 });
 
 // Add repository to the container

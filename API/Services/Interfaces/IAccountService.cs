@@ -4,6 +4,8 @@ namespace API.Services.Interfaces
 {
     public interface IAccountService
     {
+        Task<int> AddAccountRoleAsync(AddAccountRoleRequestDto addAccountRoleRequestDto);
+        Task<int> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto);
         Task<IEnumerable<AccountResponseDto>?> GetAllAsync();
         Task<AccountResponseDto?> GetByIdAsync(Guid id);
         Task<int> CreateAsync(AccountRequestDto entity);

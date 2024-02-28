@@ -1,12 +1,12 @@
-﻿namespace API.DTOs.Accounts
+namespace API.DTOs.Accounts;
+
+public class AccountResponseDto
 {
-    public record AccountResponseDto(
-        Guid Id,
-        string Password,
-        int Otp,
-        DateTime Expired,
-        bool IsUsed,
-        bool IsActive,
-        string Role
-        );
+    public Guid Id { get; init; }
+    public string Password { get; init; }
+    public int Otp { get; init; }
+    public DateTime Expired { get; init; }
+    public bool IsUsed { get; init; }
+    public bool IsActive { get; init; }
+    public IEnumerable<string> Roles { get; init; }
 }

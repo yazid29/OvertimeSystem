@@ -22,30 +22,79 @@ namespace API.Services
             _roleRepository = roleRepository;
             _accountRoleRepository = accountRoleRepository;
         }
+        public async Task<int> AddAccountRoleAsync(AddAccountRoleRequestDto addAccountRoleRequestDto)
+        {
+            try
+            {
+                var account = await _accountRepository.GetByIdAsync(addAccountRoleRequestDto.AccountId);
+
+                if (account == null)
+                {
+                    return 0; // Account not found
+                }
+
+                var role = await _roleRepository.GetByIdAsync(addAccountRoleRequestDto.RoleId);
+
+                if (role == null)
+                {
+                    return -1; // Account not found
+                }
+
+                var accountRole = _mapper.Map<AccountRole>(addAccountRoleRequestDto);
+
+                await _accountRoleRepository.CreateAsync(accountRole);
+
+                return 1; // success
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
+                                  Console.ForegroundColor = ConsoleColor.Red);
+
+                throw; // error
+            }
+        }
+
+        public async Task<int> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto)
+        {
+            try
+            {
+                var accountRole = await _accountRoleRepository.GetDataByAccountIdAndRoleAsync(removeAccountRoleRequestDto.AccountId, removeAccountRoleRequestDto.RoleId);
+
+                if (accountRole == null)
+                {
+                    return 0; // Account or Role not found
+                }
+
+                await _accountRoleRepository.DeleteAsync(accountRole);
+
+                return 1; // success
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
+                                  Console.ForegroundColor = ConsoleColor.Red);
+
+                throw; // error
+            }
+        }
+
         public async Task<IEnumerable<AccountResponseDto>?> GetAllAsync()
         {
             try
             {
                 var data = await _accountRepository.GetAllAsync();
-                var AccRole = await _accountRoleRepository.GetAllAsync();
-                var role = await _roleRepository.GetAllAsync();
-                var accountWithRole = from acr in AccRole
-                                      join acc in data on acr.AccountId equals acc.Id
-                                      join rol in role on acr.RoleId equals rol.Id
-                                      select new AccountResponseDto
-                                      (acc.Id, acc.Password,
-                                          acc.Otp,
-                                          acc.Expired,
-                                          acc.IsUsed,
-                                          acc.IsActive,
-                                          rol.Name);
-                //var dataMap = _mapper.Map<IEnumerable<AccountResponseDto>>(accountWithRole);
-                return accountWithRole; //success
+
+                var dataMap = _mapper.Map<IEnumerable<AccountResponseDto>>(data);
+
+                return dataMap; // success
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message, Console.ForegroundColor = ConsoleColor.Red);
-                throw; //error
+                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
+                                  Console.ForegroundColor = ConsoleColor.Red);
+
+                throw; // error
             }
         }
 
@@ -53,52 +102,42 @@ namespace API.Services
         {
             try
             {
-                var data = await _accountRepository.GetByIdAsync(id);
-                if(data.Id.GetType() == typeof(Guid))
+                var account = await _accountRepository.GetByIdAsync(id);
+
+                if (account == null)
                 {
-                    var AccRole = await _accountRoleRepository.GetAllAsync();
-                    var role = await _roleRepository.GetAllAsync();
-                    var accountWithRole = from acr in AccRole
-                                          join rol in role on acr.RoleId equals rol.Id
-                                          where acr.AccountId == data.Id 
-                                          select new AccountResponseDto(
-                                              data.Id,
-                                              data.Password,
-                                              data.Otp,
-                                              data.Expired,
-                                              data.IsUsed,
-                                              data.IsActive,
-                                              rol.Name);
-                    var result = accountWithRole.FirstOrDefault();
-                    return result;
+                    return null; // not found
                 }
-                else
-                {
-                    return null;
-                }
-                //var dataMap = _mapper.Map<AccountResponseDto>(data);
-                
+
+                var dataMap = _mapper.Map<AccountResponseDto>(account);
+
+                return dataMap; // success
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message, Console.ForegroundColor = ConsoleColor.Red);
-                throw;
+                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
+                                  Console.ForegroundColor = ConsoleColor.Red);
+
+                throw; // error
             }
         }
 
-        public async Task<int> CreateAsync(AccountRequestDto entity)
+        public async Task<int> CreateAsync(AccountRequestDto accountRequestDto)
         {
             try
             {
-                var data = _mapper.Map<Account>(entity);
-                await _accountRepository.CreateAsync(data);
+                var account = _mapper.Map<Account>(accountRequestDto);
 
-                return 1;
+                await _accountRepository.CreateAsync(account);
+
+                return 1; // success
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message, Console.ForegroundColor = ConsoleColor.Red);
-                throw;
+                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
+                                  Console.ForegroundColor = ConsoleColor.Red);
+
+                throw; // error
             }
         }
 

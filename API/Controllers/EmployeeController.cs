@@ -15,7 +15,7 @@ public class EmployeeController : ControllerBase
         _employeeService = employeeService;
     }
 
-    [HttpGet]
+    [HttpGet("getall-employe")]
     public async Task<IActionResult> GetAllAsync()
     {
         var results = await _employeeService.GetAllAsync();
