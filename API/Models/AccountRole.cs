@@ -13,7 +13,7 @@ namespace API.Models
         [Column("role_id", TypeName = "char(36)")]
         public Guid RoleId { get; set; }
         // Cardinality
-        public Account? Account { get; set; }
-        public Role? Role { get; set; }
+        public virtual Account? Account { get; set; }
+        public virtual Role? Role { get; set; }
     }
 }

@@ -28,9 +28,9 @@ namespace API.Models
         [Column("manager_id", TypeName = "char(36)")]
         public Guid? ManagerId { get; set; }
         // Cardinality
-        public Account? Account { get; set; }
-        public Employee? Manager { get; set; }
-        public ICollection<Employee>? Employees { get; set; }
+        public virtual Account? Account { get; set; }
+        public virtual Employee? Manager { get; set; }
+        public virtual ICollection<Employee>? Employees { get; set; }
 
     }
 }

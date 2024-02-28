@@ -20,7 +20,7 @@ namespace API.Models
         public string? Comment { get; set; }
 
         //cardinality
-        public Account? Account { get; set; }
-        public Overtime? Overtime { get; set; }
+        public virtual Account? Account { get; set; }
+        public virtual Overtime? Overtime { get; set; }
     }
 }

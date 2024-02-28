@@ -20,8 +20,8 @@ namespace API.Models
         public bool IsActive { get; set; }
 
         // Cardinality
-        public Employee? Employee { get; set; }
-        public ICollection<AccountRole>? AccoutRoles { get; set; }
-        public ICollection<OvertimeRequest>? OvertimeRequests { get; set; }
+        public virtual Employee? Employee { get; set; }
+        public virtual ICollection<AccountRole>? AccoutRoles { get; set; }
+        public virtual ICollection<OvertimeRequest>? OvertimeRequests { get; set; }
     }
 }

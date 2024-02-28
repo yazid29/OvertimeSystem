@@ -12,6 +12,6 @@ namespace API.Models
         public string Name { get; set; } = string.Empty;
 
         // Cardinality
-        public ICollection<AccountRole>? AccoutRoles { get; set; }
+        public virtual ICollection<AccountRole>? AccoutRoles { get; set; }
     }
 }
