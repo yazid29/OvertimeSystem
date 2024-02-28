@@ -13,7 +13,8 @@ namespace API.Repositories.Data
 
         public async Task<Role?> GetGuidbyRole(string role)
         {
-            return await _context.Set<Role>().Where(e => e.Name == role).FirstOrDefaultAsync();
+            //return await _context.Set<Role>().Where(e => e.Name == role).FirstOrDefaultAsync();
+            return await _context.Set<Role>().FirstOrDefaultAsync(e => e.Name.Contains(role));
         }
     }
 }

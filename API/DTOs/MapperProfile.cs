@@ -32,9 +32,10 @@ namespace API.DTOs
                .ForMember(dest => dest.Expired,
                           opt => opt.MapFrom(src => DateTime.Now))
                .ForMember(dest => dest.IsUsed,
-                          opt => opt.MapFrom(src => true))
+                          opt => opt.MapFrom(src => false))
                .ForMember(dest => dest.IsActive,
                           opt => opt.MapFrom(src => true));
+
             CreateMap<Role, AccountRole>()
                 .ForMember(dest => dest.RoleId,
                           opt => opt.MapFrom(src => src.Id));

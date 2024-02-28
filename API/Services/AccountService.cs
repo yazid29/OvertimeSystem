@@ -3,6 +3,7 @@ using API.DTOs.Accounts;
 using API.Models;
 using API.Repositories.Interfaces;
 using API.Services.Interfaces;
+using API.Utilities.Handlers;
 using AutoMapper;
 
 namespace API.Services
@@ -24,6 +25,23 @@ namespace API.Services
             _accountRoleRepository = accountRoleRepository;
             _employeeRepository = employeeRepository;
         }
+        public async Task<int> LoginAsync(LoginDto entity)
+        {
+            var employee = await _employeeRepository.GetByEmailAsync(entity.Email);
+            if (employee == null)
+            {
+                return 2;
+            }
+            var accountEmp = await _accountRepository.GetByIdAsync(employee.Id);
+            var passwordAccEmp = accountEmp.Password;
+            
+            var cek = BCryptHandler.VerifyPassword(entity.Password, passwordAccEmp);
+            if (cek == false)
+            {
+                return 0;
+            }
+            return 1;
+        }
         public async Task<int> RegisterAsync(RegisterDto entity)
         {
             var employee = _mapper.Map<Employee>(entity);
@@ -38,10 +56,16 @@ namespace API.Services
             await _accountRepository.ChangeTrackingAsync();
 
             var role = await _roleRepository.GetGuidbyRole("employee");
+            if (role == null) return 2;
             await _roleRepository.ChangeTrackingAsync();
 
-            var accRoleEmp = _mapper.Map<AccountRole>(role);
-            accRoleEmp.AccountId = employee.Id;
+            //var accRoleEmp = _mapper.Map<AccountRole>(role);
+            //accRoleEmp.AccountId = employee.Id;
+            var accRoleEmp = new AccountRole
+            {
+                AccountId = accountEmp.Id,
+                RoleId = role.Id
+            };
             await _accountRoleRepository.CreateAsync(accRoleEmp);
             await _accountRoleRepository.ChangeTrackingAsync();
 

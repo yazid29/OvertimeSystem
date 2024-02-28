@@ -10,6 +10,12 @@ namespace API.Repositories.Data
         public EmployeeRepository(OvertimeServiceDbContext context) : base(context)
         {
         }
+
+        public async Task<Employee?> GetByEmailAsync(string email)
+        {
+            return await _context.Set<Employee>().Where(emp => emp.Email == email).FirstOrDefaultAsync();
+        }
+
         public async Task<Employee?> GetByNikAsync(string nik)
         {
             return await _context.Set<Employee>().Where(e => e.Nik == nik).FirstOrDefaultAsync();

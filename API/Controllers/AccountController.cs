@@ -1,5 +1,7 @@
 ﻿using API.DTOs.Accounts;
+using API.Repositories.Interfaces;
 using API.Services.Interfaces;
+using API.Utilities.Handlers;
 using API.Utilities.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -10,9 +12,32 @@ public class AccountController : ControllerBase
 {
     private readonly IAccountService _aService;
 
-    public AccountController(IAccountService accountService)
+
+    public AccountController(IAccountService accountService, IEmployeeRepository employeeRepository, IAccountRepository accRepository)
     {
         _aService = accountService;
+    }
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginAsync(LoginDto entity)
+    {
+        var result = await _aService.LoginAsync(entity);
+
+        if (result == 0)
+        {
+            BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "Password Not Match"
+                                                 ));
+        }else if (result == 2)
+        {
+            BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "Email tidak ada"
+                                                 ));
+        }
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Login Success"));
     }
     [HttpPost("register")]
     public async Task<IActionResult> RegisterAsync(RegisterDto entity)
@@ -20,9 +45,15 @@ public class AccountController : ControllerBase
         var result = await _aService.RegisterAsync(entity);
         if(result == 0)
         {
-            return NotFound(new MessageResponseVM(StatusCodes.Status400BadRequest,
+            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
                                                   HttpStatusCode.BadRequest.ToString(),
                                                   "Password and Confirm Password Does Not Match"
+                                                 ));
+        }else if (result == 2)
+        {
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Role Not Found"
                                                  ));
         }
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
