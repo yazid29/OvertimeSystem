@@ -7,8 +7,8 @@ namespace API.Services.Interfaces
     {
         Task<IEnumerable<EmployeeResponseDto>?> GetAllAsync();
         Task<EmployeeResponseDto?> GetByIdAsync(Guid id);
-        Task<int> CreateAsync(RegisterDto employee);
-        Task<int> UpdateAsync(Guid id, RegisterDto employee);
+        Task<int> CreateAsync(EmployeeRequestDto employee);
+        Task<int> UpdateAsync(Guid id, EmployeeRequestDto employee);
         Task<int> DeleteAsync(Guid id);
     }
 }

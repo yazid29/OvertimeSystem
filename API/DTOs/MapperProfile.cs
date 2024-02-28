@@ -18,8 +18,27 @@ namespace API.DTOs
                           opt => opt.MapFrom(src => DateTime.Now));
 
             CreateMap<Employee, EmployeeResponseDto>();
+            CreateMap<RegisterDto, Employee>()
+                .ForMember(dest => dest.Id,
+                          opt => opt.MapFrom(src => Guid.NewGuid()))
+                .ForMember(dest => dest.JoinedDate,
+                          opt => opt.MapFrom(src => DateTime.Now));
 
             // For Accounts
+            CreateMap<RegisterDto, Account>()
+               .ForMember(dest => dest.Password, opt => opt.MapFrom(src => BCryptHandler.HashPassword(src.Password)))
+               .ForMember(dest => dest.Otp,
+                          opt => opt.MapFrom(src => 0))
+               .ForMember(dest => dest.Expired,
+                          opt => opt.MapFrom(src => DateTime.Now))
+               .ForMember(dest => dest.IsUsed,
+                          opt => opt.MapFrom(src => true))
+               .ForMember(dest => dest.IsActive,
+                          opt => opt.MapFrom(src => true));
+            CreateMap<Role, AccountRole>()
+                .ForMember(dest => dest.RoleId,
+                          opt => opt.MapFrom(src => src.Id));
+
             CreateMap<AccountRequestDto, Account>()
                .ForMember(dest => dest.Password, opt => opt.MapFrom(src => BCryptHandler.HashPassword(src.Password)))
                .ForMember(dest => dest.Otp,

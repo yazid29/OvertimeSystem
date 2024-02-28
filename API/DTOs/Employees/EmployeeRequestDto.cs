@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Employees
 {
-    public record RegisterDto(
+    public record EmployeeRequestDto(
         string? Nik,
         string FirstName,
         string? LastName,
@@ -8,8 +8,6 @@
         string Email,
         string Position,
         string Department,
-        Guid? ManagerId,
-        string Password,
-        string ConfirmPassword
+        Guid? ManagerId
         );
 }

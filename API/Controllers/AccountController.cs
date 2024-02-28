@@ -14,6 +14,21 @@ public class AccountController : ControllerBase
     {
         _aService = accountService;
     }
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterAsync(RegisterDto entity)
+    {
+        var result = await _aService.RegisterAsync(entity);
+        if(result == 0)
+        {
+            return NotFound(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "Password and Confirm Password Does Not Match"
+                                                 ));
+        }
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Created"));
+    }
 
     [HttpDelete("remove-role")]
     public async Task<IActionResult> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto)
@@ -24,13 +39,13 @@ public class AccountController : ControllerBase
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
-                                                  "Id Employee Not Found"
+                                                  "Id Role Account Not Found"
                                                  )); // Data Not Found
         }
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Employee Deleted"));
+                                        "Role  Account Deleted"));
     }
 
     [HttpPost("add-role")]

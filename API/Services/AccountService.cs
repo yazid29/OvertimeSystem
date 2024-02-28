@@ -1,10 +1,9 @@
 ﻿using API.DTOs.Accounts;
+using API.DTOs.Accounts;
 using API.Models;
 using API.Repositories.Interfaces;
 using API.Services.Interfaces;
 using AutoMapper;
-using System.Xml.Linq;
-using static System.Net.WebRequestMethods;
 
 namespace API.Services
 {
@@ -13,172 +12,137 @@ namespace API.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IAccountRoleRepository _accountRoleRepository;
         private readonly IRoleRepository _roleRepository;
+        private readonly IEmployeeRepository _employeeRepository;
         private readonly IMapper _mapper;
 
-        public AccountService(IAccountRepository repo, IMapper mapper, IRoleRepository roleRepository, IAccountRoleRepository accountRoleRepository)
+        public AccountService(IAccountRepository repo, IMapper mapper, IRoleRepository roleRepository, IAccountRoleRepository accountRoleRepository, IEmployeeRepository employeeRepository)
         {
+
             _accountRepository = repo;
             _mapper = mapper;
             _roleRepository = roleRepository;
             _accountRoleRepository = accountRoleRepository;
+            _employeeRepository = employeeRepository;
+        }
+        public async Task<int> RegisterAsync(RegisterDto entity)
+        {
+            var employee = _mapper.Map<Employee>(entity);
+            await _employeeRepository.CreateAsync(employee);
+            await _employeeRepository.ChangeTrackingAsync();
+
+            if (entity.Password != entity.ConfirmPassword) return 0;
+
+            var accountEmp = _mapper.Map<Account>(entity);
+            accountEmp.Id = employee.Id;
+            await _accountRepository.CreateAsync(accountEmp);
+            await _accountRepository.ChangeTrackingAsync();
+
+            var role = await _roleRepository.GetGuidbyRole("employee");
+            await _roleRepository.ChangeTrackingAsync();
+
+            var accRoleEmp = _mapper.Map<AccountRole>(role);
+            accRoleEmp.AccountId = employee.Id;
+            await _accountRoleRepository.CreateAsync(accRoleEmp);
+            await _accountRoleRepository.ChangeTrackingAsync();
+
+            return 1;
         }
         public async Task<int> AddAccountRoleAsync(AddAccountRoleRequestDto addAccountRoleRequestDto)
         {
-            try
+            var account = await _accountRepository.GetByIdAsync(addAccountRoleRequestDto.AccountId);
+
+            if (account == null)
             {
-                var account = await _accountRepository.GetByIdAsync(addAccountRoleRequestDto.AccountId);
-
-                if (account == null)
-                {
-                    return 0; // Account not found
-                }
-
-                var role = await _roleRepository.GetByIdAsync(addAccountRoleRequestDto.RoleId);
-
-                if (role == null)
-                {
-                    return -1; // Account not found
-                }
-
-                var accountRole = _mapper.Map<AccountRole>(addAccountRoleRequestDto);
-
-                await _accountRoleRepository.CreateAsync(accountRole);
-
-                return 1; // success
+                return 0; // Account not found
             }
-            catch (Exception ex)
+
+            var role = await _roleRepository.GetByIdAsync(addAccountRoleRequestDto.RoleId);
+
+            if (role == null)
             {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
-                                  Console.ForegroundColor = ConsoleColor.Red);
-
-                throw; // error
+                return -1; // Account not found
             }
+
+            var accountRole = _mapper.Map<AccountRole>(addAccountRoleRequestDto);
+
+            await _accountRoleRepository.CreateAsync(accountRole);
+
+            return 1; // success
         }
 
         public async Task<int> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto)
         {
-            try
+            var accountRole = await _accountRoleRepository.GetDataByAccountIdAndRoleAsync(removeAccountRoleRequestDto.AccountId, removeAccountRoleRequestDto.RoleId);
+
+            if (accountRole == null)
             {
-                var accountRole = await _accountRoleRepository.GetDataByAccountIdAndRoleAsync(removeAccountRoleRequestDto.AccountId, removeAccountRoleRequestDto.RoleId);
-
-                if (accountRole == null)
-                {
-                    return 0; // Account or Role not found
-                }
-
-                await _accountRoleRepository.DeleteAsync(accountRole);
-
-                return 1; // success
+                return 0; // Account or Role not found
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
-                                  Console.ForegroundColor = ConsoleColor.Red);
 
-                throw; // error
-            }
+            await _accountRoleRepository.DeleteAsync(accountRole);
+
+            return 1; // success
         }
 
         public async Task<IEnumerable<AccountResponseDto>?> GetAllAsync()
         {
-            try
-            {
-                var data = await _accountRepository.GetAllAsync();
+            var data = await _accountRepository.GetAllAsync();
 
-                var dataMap = _mapper.Map<IEnumerable<AccountResponseDto>>(data);
+            var dataMap = _mapper.Map<IEnumerable<AccountResponseDto>>(data);
 
-                return dataMap; // success
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
-                                  Console.ForegroundColor = ConsoleColor.Red);
+            return dataMap; // success
 
-                throw; // error
-            }
         }
 
         public async Task<AccountResponseDto?> GetByIdAsync(Guid id)
         {
-            try
+            var account = await _accountRepository.GetByIdAsync(id);
+
+            if (account == null)
             {
-                var account = await _accountRepository.GetByIdAsync(id);
-
-                if (account == null)
-                {
-                    return null; // not found
-                }
-
-                var dataMap = _mapper.Map<AccountResponseDto>(account);
-
-                return dataMap; // success
+                return null; // not found
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
-                                  Console.ForegroundColor = ConsoleColor.Red);
 
-                throw; // error
-            }
+            var dataMap = _mapper.Map<AccountResponseDto>(account);
+
+            return dataMap; // success
         }
 
         public async Task<int> CreateAsync(AccountRequestDto accountRequestDto)
         {
-            try
-            {
-                var account = _mapper.Map<Account>(accountRequestDto);
 
-                await _accountRepository.CreateAsync(account);
+            var account = _mapper.Map<Account>(accountRequestDto);
 
-                return 1; // success
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message,
-                                  Console.ForegroundColor = ConsoleColor.Red);
+            await _accountRepository.CreateAsync(account);
 
-                throw; // error
-            }
+            return 1; // success
         }
 
         public async Task<int> UpdateAsync(Guid id, AccountRequestDto entity)
         {
-            try
+
+            var data = await _accountRepository.GetByIdAsync(id);
+            if (data is null)
             {
-                var data = await _accountRepository.GetByIdAsync(id);
-                if (data is null)
-                {
-                    return 0;
-                }
-                var account = _mapper.Map<Account>(entity);
-                account.Id = id;
-                await _accountRepository.UpdateAsync(account);
-                return 1;
+                return 0;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message, Console.ForegroundColor = ConsoleColor.Red);
-                throw;
-            }
+            var account = _mapper.Map<Account>(entity);
+            account.Id = id;
+            await _accountRepository.UpdateAsync(account);
+            return 1;
         }
 
         public async Task<int> DeleteAsync(Guid id)
         {
-            try
+
+            var data = await _accountRepository.GetByIdAsync(id);
+            if (data is null)
             {
-                var data = await _accountRepository.GetByIdAsync(id);
-                if (data is null)
-                {
-                    return 0;
-                }
-                await _accountRepository.DeleteAsync(data);
-                return 1;
+                return 0;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.InnerException?.Message ?? ex.Message, Console.ForegroundColor = ConsoleColor.Red);
-                throw;
-            }
+            await _accountRepository.DeleteAsync(data);
+            return 1;
         }
+
     }
 }

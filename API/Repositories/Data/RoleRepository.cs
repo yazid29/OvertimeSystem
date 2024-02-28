@@ -10,5 +10,10 @@ namespace API.Repositories.Data
         public RoleRepository(OvertimeServiceDbContext context) : base(context)
         {
         }
+
+        public async Task<Role?> GetGuidbyRole(string role)
+        {
+            return await _context.Set<Role>().Where(e => e.Name == role).FirstOrDefaultAsync();
+        }
     }
 }

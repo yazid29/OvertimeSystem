@@ -1,4 +1,5 @@
-﻿using API.DTOs.Employees;
+﻿using API.DTOs.Accounts;
+using API.DTOs.Employees;
 using API.Services.Interfaces;
 using API.Utilities.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -51,7 +52,7 @@ public class EmployeeController : ControllerBase
                                                result));
     }
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(RegisterDto employee)
+    public async Task<IActionResult> CreateAsync(EmployeeRequestDto employee)
     {
         var result = await _employeeService.CreateAsync(employee);
 
@@ -61,7 +62,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, RegisterDto employee)
+    public async Task<IActionResult> UpdateAsync(Guid id, EmployeeRequestDto employee)
     {
         var result = await _employeeService.UpdateAsync(id, employee);
 
