@@ -45,4 +45,9 @@ public class GeneralRepository<TEntity> : IGeneralRepository<TEntity> where TEnt
         _context.Set<TEntity>().Remove(entity);
         await _context.SaveChangesAsync();
     }
+    public Task ChangeTrackingAsync()
+    {
+        _context.ChangeTracker.Clear();
+        return Task.CompletedTask;
+    }
 }

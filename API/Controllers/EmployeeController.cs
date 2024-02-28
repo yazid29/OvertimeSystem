@@ -51,7 +51,7 @@ public class EmployeeController : ControllerBase
                                                result));
     }
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(EmployeeRequestDto employee)
+    public async Task<IActionResult> CreateAsync(RegisterDto employee)
     {
         var result = await _employeeService.CreateAsync(employee);
 
@@ -61,7 +61,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, EmployeeRequestDto employee)
+    public async Task<IActionResult> UpdateAsync(Guid id, RegisterDto employee)
     {
         var result = await _employeeService.UpdateAsync(id, employee);
 

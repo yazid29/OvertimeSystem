@@ -3,6 +3,7 @@ using API.DTOs.Employees;
 using API.DTOs.Overtimes;
 using API.DTOs.Roles;
 using API.Models;
+using API.Utilities.Handlers;
 using AutoMapper;
 
 namespace API.DTOs
@@ -20,6 +21,7 @@ namespace API.DTOs
 
             // For Accounts
             CreateMap<AccountRequestDto, Account>()
+               .ForMember(dest => dest.Password, opt => opt.MapFrom(src => BCryptHandler.HashPassword(src.Password)))
                .ForMember(dest => dest.Otp,
                           opt => opt.MapFrom(src => 0))
                .ForMember(dest => dest.Expired,

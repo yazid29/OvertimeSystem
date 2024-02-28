@@ -11,4 +11,5 @@ public interface IGeneralRepository<TEntity>
     Task<TEntity> CreateAsync(TEntity entity);
     Task UpdateAsync(TEntity entity);
     Task DeleteAsync(TEntity entity);
+    Task ChangeTrackingAsync();
 }

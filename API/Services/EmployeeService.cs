@@ -78,6 +78,7 @@ namespace API.Services
             try
             {
                 var data = await _employeeRepository.GetByIdAsync(id);
+                await _employeeRepository.ChangeTrackingAsync();
                 if (data == null)
                 {
                     return 0; // not found
