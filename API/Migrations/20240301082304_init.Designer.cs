@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(OvertimeServiceDbContext))]
-    [Migration("20240226083826_virtualRelation")]
-    partial class virtualRelation
+    [Migration("20240301082304_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -240,7 +240,7 @@ namespace API.Migrations
             modelBuilder.Entity("API.Models.AccountRole", b =>
                 {
                     b.HasOne("API.Models.Account", "Account")
-                        .WithMany("AccoutRoles")
+                        .WithMany("AccountRoles")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -292,7 +292,7 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Models.Account", b =>
                 {
-                    b.Navigation("AccoutRoles");
+                    b.Navigation("AccountRoles");
 
                     b.Navigation("OvertimeRequests");
                 });

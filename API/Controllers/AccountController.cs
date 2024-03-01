@@ -1,136 +1,157 @@
-﻿using API.DTOs.Accounts;
-using API.Repositories.Interfaces;
+using System.Net;
+using API.DTOs.Accounts;
 using API.Services.Interfaces;
-using API.Utilities.Handlers;
 using API.Utilities.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
+namespace API.Controllers;
 
-[Authorize]
+[Authorize(Roles = "employee")]
 [ApiController]
 [Route("account")]
 public class AccountController : ControllerBase
 {
-    private readonly IAccountService _aService;
+    private readonly IAccountService _accountService;
 
-
-    public AccountController(IAccountService accountService, IEmployeeRepository employeeRepository, IAccountRepository accRepository)
+    public AccountController(IAccountService accountService)
     {
-        _aService = accountService;
+        _accountService = accountService;
     }
-    [HttpPost("login")]
-    public async Task<IActionResult> LoginAsync(LoginDto entity)
+    
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPasswordAsync(ResetPasswordRequestDto resetPasswordRequestDto)
     {
-        var result = await _aService.LoginAsync(entity);
+        var result = await _accountService.ResetPasswordAsync(resetPasswordRequestDto);
 
-        if (result == 0)
+        if (result == -4)
         {
             return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
                                                   HttpStatusCode.BadRequest.ToString(),
-                                                  "Email or Password Do Not Match"
-                                                 ));
+                                                  "Password Not Match"
+                                                 )); // Password Not Match
         }
-        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
-                                        HttpStatusCode.OK.ToString(),
-                                        "Login Success"));
-    }
-    [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordDto entity)
-    {
-        var result = await _aService.ForgotPasswordAsync(entity);
         
         if (result == 0)
         {
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Account Not Found"
+                                                 )); // Data Not Found
+        }
+        
+        if (result == -1)
+        {
             return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
                                                   HttpStatusCode.BadRequest.ToString(),
+                                                  "Otp Expired"
+                                                 )); // Otp Expired
+        }
+        
+        if (result == -2)
+        {
+            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "Otp Not Match"
+                                                 )); // Otp Not Match
+        }
+        
+        if (result == -3)
+        {
+            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "Otp Already Used"
+                                                 )); // Otp Already Used
+        }
+        
+        
+
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Password Reset"));
+    }
+    
+    [AllowAnonymous]
+    [HttpPost("send-otp")]
+    public async Task<IActionResult> SendOtpAsync(string email)
+    {
+        var result = await _accountService.SendOtpAsync(email);
+
+        if (result == 0)
+        {
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
                                                   "Email Not Found"
-                                                 ));
-        }
-        return Ok(new SingleResponseVM<ForgotPasswordResponseDto>(StatusCodes.Status200OK,
-                                        HttpStatusCode.OK.ToString(),
-                                        "Code OTP Has Been Sent",new ForgotPasswordResponseDto(result)));
-    }
-    [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequestDto entity)
-    {
-        var result = await _aService.ChangePasswordAsync(entity);
-        if (result == 0)
-        {
-            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
-                                                  HttpStatusCode.BadRequest.ToString(),
-                                                  "Email or Password Do Not Match"
-                                                 ));
-        }
-        else if (result == 2)
-        {
-            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
-                                                  HttpStatusCode.BadRequest.ToString(),
-                                                  "OTP Code Has Been Used"
-                                                 ));
-        }else if (result == 3)
-        {
-            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
-                                                  HttpStatusCode.BadRequest.ToString(),
-                                                  "OTP Code Has Been Expired"
-                                                 ));
-        }
-        else if (result == 4)
-        {
-            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
-                                                  HttpStatusCode.BadRequest.ToString(),
-                                                  "Incorrect OTP"
-                                                 ));
-        }
-        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
-                                        HttpStatusCode.OK.ToString(),
-                                        "New Password Has Been Created"));
-    }
-    [HttpPost("register")]
-    public async Task<IActionResult> RegisterAsync(RegisterDto entity)
-    {
-        var result = await _aService.RegisterAsync(entity);
-        if(result == 0)
-        {
-            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
-                                                  HttpStatusCode.BadRequest.ToString(),
-                                                  "Password and Confirm Password Does Not Match"
-                                                 ));
-        }else if (result == 2)
-        {
-            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
-                                                  HttpStatusCode.NotFound.ToString(),
-                                                  "Role Not Found"
-                                                 ));
-        }
-        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
-                                        HttpStatusCode.OK.ToString(),
-                                        "Account Created"));
-    }
-
-    [HttpDelete("remove-role")]
-    public async Task<IActionResult> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto)
-    {
-        var result = await _aService.RemoveRoleAsync(removeAccountRoleRequestDto);
-
-        if (result == 0)
-        {
-            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
-                                                  HttpStatusCode.NotFound.ToString(),
-                                                  "Id Role Account Not Found"
                                                  )); // Data Not Found
         }
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
-                                        "Role  Account Deleted"));
+                                        "Otp Sent to Email"));
+    }
+    
+    [AllowAnonymous]
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginAsync(LoginRequestDto loginRequestDto)
+    {
+        var result = await _accountService.LoginAsync(loginRequestDto);
+
+        if (result == null)
+        {
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Email or Password Not Found"
+                                                 )); // Data Not Found
+        }
+
+        return Ok(new SingleResponseVM<LoginResponseDto>(StatusCodes.Status200OK,
+                                                           HttpStatusCode.OK.ToString(),
+                                                           "Login Success",
+                                                           result));
+    }
+    
+    [AllowAnonymous]
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterAsync(RegisterDto registerDto)
+    {
+        var result = await _accountService.RegisterAsync(registerDto);
+
+        if (result == -1)
+        {
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Role Not Found"
+                                                 )); // Data Not Found
+        }
+        
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Account Created"));
     }
 
+    [Authorize(Roles = "admin")]
+    [HttpDelete("remove-role")]
+    public async Task<IActionResult> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto)
+    {
+        var result = await _accountService.RemoveRoleAsync(removeAccountRoleRequestDto);
+
+        if (result == 0)
+            return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
+                                                  HttpStatusCode.NotFound.ToString(),
+                                                  "Id Employee Not Found"
+                                                 )); // Data Not Found
+
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Employee Deleted"));
+    }
+
+    [Authorize(Roles = "admin")]
     [HttpPost("add-role")]
     public async Task<IActionResult> AddRoleAsync(AddAccountRoleRequestDto addAccountRoleRequestDto)
     {
-        var result = await _aService.AddAccountRoleAsync(addAccountRoleRequestDto);
+        var result = await _accountService.AddAccountRoleAsync(addAccountRoleRequestDto);
 
         if (result == 0)
         {
@@ -156,7 +177,7 @@ public class AccountController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllAsync()
     {
-        var results = await _aService.GetAllAsync();
+        var results = await _accountService.GetAllAsync();
 
         if (!results.Any())
         {
@@ -166,15 +187,15 @@ public class AccountController : ControllerBase
         }
 
         return Ok(new ListResponseVM<AccountResponseDto>(StatusCodes.Status200OK,
-                                               HttpStatusCode.OK.ToString(),
-                                               "Data Account Found",
-                                               results.ToList()));
+                                                         HttpStatusCode.OK.ToString(),
+                                                         "Data Account Found",
+                                                         results.ToList()));
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetByIdAsync(Guid id)
     {
-        var result = await _aService.GetByIdAsync(id);
+        var result = await _accountService.GetByIdAsync(id);
 
         if (result is null)
         {
@@ -184,15 +205,15 @@ public class AccountController : ControllerBase
         }
 
         return Ok(new SingleResponseVM<AccountResponseDto>(StatusCodes.Status200OK,
-                                               HttpStatusCode.OK.ToString(),
-                                               "Data Account Found",
-                                               result));
+                                                           HttpStatusCode.OK.ToString(),
+                                                           "Data Account Found",
+                                                           result));
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(AccountRequestDto account)
+    public async Task<IActionResult> CreateAsync(AccountRequestDto accountRequestDto)
     {
-        var result = await _aService.CreateAsync(account);
+        var result = await _accountService.CreateAsync(accountRequestDto);
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
@@ -200,16 +221,16 @@ public class AccountController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, AccountRequestDto account)
+    public async Task<IActionResult> UpdateAsync(Guid id, AccountRequestDto accountRequestDto)
     {
-        var result = await _aService.UpdateAsync(id, account);
+        var result = await _accountService.UpdateAsync(id, accountRequestDto);
 
         if (result == 0)
         {
             return NotFound(new MessageResponseVM(StatusCodes.Status404NotFound,
                                                   HttpStatusCode.NotFound.ToString(),
                                                   "Id Account Not Found"
-            )); // Data Not Found
+                                                 )); // Data Not Found
         }
 
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
@@ -220,7 +241,7 @@ public class AccountController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {
-        var result = await _aService.DeleteAsync(id);
+        var result = await _accountService.DeleteAsync(id);
 
         if (result == 0)
         {

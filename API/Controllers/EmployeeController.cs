@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
+[Authorize(Roles = "employee")]
 [ApiController]
 [Route("employee")]
 public class EmployeeController : ControllerBase

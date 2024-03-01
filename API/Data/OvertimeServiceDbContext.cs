@@ -16,7 +16,7 @@ namespace API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder) { 
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Account>()
-                .HasMany(acc => acc.AccoutRoles)
+                .HasMany(acc => acc.AccountRoles)
                 .WithOne(ar => ar.Account)
                 .HasForeignKey(ar => ar.AccountId);
             modelBuilder.Entity<Account>()

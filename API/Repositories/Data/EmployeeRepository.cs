@@ -20,6 +20,9 @@ namespace API.Repositories.Data
         {
             return await _context.Set<Employee>().Where(e => e.Nik == nik).FirstOrDefaultAsync();
         }
-
+        public async Task<string?> GetLastNikAsync()
+        {
+            return _context.Set<Employee>().ToList().Select(e => e.Nik).LastOrDefault();
+        }
     }
 }

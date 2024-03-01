@@ -21,7 +21,7 @@ namespace API.Models
 
         // Cardinality
         public virtual Employee? Employee { get; set; }
-        public virtual ICollection<AccountRole>? AccoutRoles { get; set; }
+        public virtual ICollection<AccountRole>? AccountRoles { get; set; }
         public virtual ICollection<OvertimeRequest>? OvertimeRequests { get; set; }
     }
 }

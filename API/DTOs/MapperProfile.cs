@@ -52,7 +52,7 @@ namespace API.DTOs
                           opt => opt.MapFrom(src => true));
             CreateMap<Account, AccountResponseDto>()
                .ForMember(dest => dest.Roles,
-                          opt => opt.MapFrom(src => src.AccoutRoles.Select(ar => ar.Role.Name)));
+                          opt => opt.MapFrom(src => src.AccountRoles.Select(ar => ar.Role.Name)));
 
             // For AccountRoles
             CreateMap<AddAccountRoleRequestDto, AccountRole>();

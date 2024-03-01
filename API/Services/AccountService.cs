@@ -1,222 +1,234 @@
-﻿using API.DTOs.Accounts;
+using System.Security.Claims;
+using API.DTOs.Accounts;
 using API.Models;
 using API.Repositories.Interfaces;
 using API.Services.Interfaces;
 using API.Utilities.Handlers;
 using AutoMapper;
 
-namespace API.Services
+namespace API.Services;
+
+public class AccountService : IAccountService
 {
-    public class AccountService : IAccountService
+    private readonly IAccountRepository _accountRepository;
+    private readonly IAccountRoleRepository _accountRoleRepository;
+    private readonly IEmployeeRepository _employeeRepository;
+    private readonly IRoleRepository _roleRepository;
+    private readonly IMapper _mapper;
+    private readonly IEmailHandler _emailHandler;
+    private readonly IJwtHandler _jwtHandler;
+
+    public AccountService(IAccountRepository accountRepository, IMapper mapper,
+                          IAccountRoleRepository accountRoleRepository, IRoleRepository roleRepository,
+                          IEmployeeRepository employeeRepository, IEmailHandler emailHandler, IJwtHandler jwtHandler)
     {
-        private readonly IAccountRepository _accountRepository;
-        private readonly IAccountRoleRepository _accountRoleRepository;
-        private readonly IRoleRepository _roleRepository;
-        private readonly IEmployeeRepository _employeeRepository;
-        private readonly IMapper _mapper;
-        private readonly IEmailHandler _emailHandler;
+        _accountRepository = accountRepository;
+        _mapper = mapper;
+        _accountRoleRepository = accountRoleRepository;
+        _roleRepository = roleRepository;
+        _employeeRepository = employeeRepository;
+        _emailHandler = emailHandler;
+        _jwtHandler = jwtHandler;
+    }
 
-        public AccountService(IAccountRepository repo, IMapper mapper, IRoleRepository roleRepository, IAccountRoleRepository accountRoleRepository, IEmployeeRepository employeeRepository, IEmailHandler emailHandler)
+    public async Task<int> ResetPasswordAsync(ResetPasswordRequestDto resetPasswordRequestDto)
+    {
+        if(resetPasswordRequestDto.Password != resetPasswordRequestDto.ConfirmPassword) return -4; // password not match
+        
+        var employee = await _employeeRepository.GetByEmailAsync(resetPasswordRequestDto.Email);
+        await _employeeRepository.ChangeTrackingAsync();
+        if (employee == null) return 0; // not found
+        
+        var account = await _accountRepository.GetByIdAsync(employee.Id);
+        if (account == null) return 0; // not found
+        
+        if (account.Expired < DateTime.Now) return -1; // otp expired
+        if (account.Otp != resetPasswordRequestDto.Otp) return -2; // otp not match
+        if (account.IsUsed) return -3; // otp already used
+        
+        account.Password = BCryptHandler.HashPassword(resetPasswordRequestDto.Password);
+        account.IsUsed = true;
+        
+        await _accountRepository.UpdateAsync(account);
+        await _accountRepository.ChangeTrackingAsync();
+
+        return 1; // success
+    }
+
+    public async Task<int> SendOtpAsync(string email)
+    {
+        var employee = await _employeeRepository.GetByEmailAsync(email);
+        if (employee == null) return 0; // not found
+        
+        var account = await _accountRepository.GetByIdAsync(employee.Id);
+        if (account == null) return 0; // not found
+        
+        var otp = new Random().Next(00000, 99999);
+        account.Otp = otp;
+        account.IsUsed = false;
+        account.Expired = DateTime.Now.AddMinutes(5);
+        
+        await _accountRepository.UpdateAsync(account);
+
+        var message = $"<p>Hi {string.Concat(employee.FirstName, " ", employee.LastName)},</p>\n" +
+                      $"<p>Your OTP is: <span style=\"font-weight: bold;\">{otp}</span>. " +
+                      $"Expires in 5 minutes.</p>\n" +
+                      $"<p>**Security:** Never share OTP, be cautious of requests, change password regularly.</p>\n\n" +
+                      $"<p>Sincerely,</p>\n  <p>The Overtime System Team</p>";
+        
+        var emailMap = new EmailDto(email, "[Reset Password] - MBKM 6", message);
+        await _emailHandler.SendEmailAsync(emailMap);
+
+        return 1; // success
+    }
+
+    public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto loginRequestDto)
+    {
+        var employee = await _employeeRepository.GetByEmailAsync(loginRequestDto.Email);
+        await _employeeRepository.ChangeTrackingAsync();
+        if (employee == null) return null; // not found
+
+        var account = await _accountRepository.GetByIdAsync(employee.Id);
+
+        //var getAccountRole = account.AccountRoles.Select(ar => ar.Role.Name);
+        var getAccountRole = await _roleRepository.GetAllRoleAsync(employee.Id);
+        if (account == null) return null; // not found
+
+        var isPasswordValid = BCryptHandler.VerifyPassword(loginRequestDto.Password, account.Password);
+        if (!isPasswordValid) return null; // not found
+
+        var claims = new List<Claim>();
+        claims.Add(new Claim("Nik", employee.Nik));
+        claims.Add(new Claim("FullName", string.Concat(employee.FirstName + " " + employee.LastName)));
+        claims.Add(new Claim("Email", employee.Email));
+
+        
+        foreach (var item in  getAccountRole)
         {
-
-            _accountRepository = repo;
-            _mapper = mapper;
-            _roleRepository = roleRepository;
-            _accountRoleRepository = accountRoleRepository;
-            _employeeRepository = employeeRepository;
-            _emailHandler = emailHandler;
+            claims.Add(new Claim(ClaimTypes.Role,item));
         }
-        public async Task<int> LoginAsync(LoginDto entity)
+        
+        var token = _jwtHandler.Generate(claims);
+        
+        return new LoginResponseDto(token);
+    }
+
+    public async Task<int> RegisterAsync(RegisterDto registerDto)
+    {
+        await using var transaction = await _accountRepository.BeginTransactionAsync();
+        try
         {
-            var employee = await _employeeRepository.GetByEmailAsync(entity.Email);
-            if (employee == null)
-            {
-                return 0;
-            }
-            var accountEmp = await _accountRepository.GetByIdAsync(employee.Id);
-            var passwordAccEmp = accountEmp.Password;
-            
-            var cek = BCryptHandler.VerifyPassword(entity.Password, passwordAccEmp);
-            if (cek == false)
-            {
-                return 0;
-            }
-            return 1;
-        }
+            var employee = _mapper.Map<Employee>(registerDto);
+            employee.Nik = GenerateHandler.Nik(await _employeeRepository.GetLastNikAsync());
 
-        async Task<int> IAccountService.ForgotPasswordAsync(ForgotPasswordDto entity)
-        {
-            
-            var employee = await _employeeRepository.GetByEmailAsync(entity.Email);
-            if (employee is null)
-            {
-                return 0;
-            }
-            var email = entity.Email;
-            var accountEmp = await _accountRepository.GetByIdAsync(employee.Id);
-            await _employeeRepository.ChangeTrackingAsync();
-            var otpCode = new Random().Next(111111, 999999);
-            accountEmp.Expired = DateTime.Now.AddMinutes(5);
-            accountEmp.IsUsed = false;
-            accountEmp.Otp = otpCode;
+            var employeeResult = await _employeeRepository.CreateAsync(employee);
 
-            await _accountRepository.UpdateAsync(accountEmp);
-            await _accountRepository.ChangeTrackingAsync();
-            var msg = $"{otpCode}";
-            var emailMap = new EmailDto(email, "[Reset Password] - MBKM 6", msg);
-            await _emailHandler.SendEmailAsync(emailMap);
-            return otpCode;
-        }
+            var account = _mapper.Map<Account>(registerDto);
+            account.Id = employeeResult.Id;
 
-        async Task<int> IAccountService.ChangePasswordAsync(ChangePasswordRequestDto entity)
-        {
-            var employee = await _employeeRepository.GetByEmailAsync(entity.Email);
-            if (employee == null)
-            {
-                return 0;
-            }
-            var accountEmp = await _accountRepository.GetByIdAsync(employee.Id);
-            await _employeeRepository.ChangeTrackingAsync();
+            var accountResult = await _accountRepository.CreateAsync(account);
 
-            if (entity.NewPassword != entity.ConfirmPassword) return 0;
-            if (accountEmp.IsUsed) return 2;
-            if (accountEmp.Expired < DateTime.Now) return 3;
-            if (accountEmp.Otp != entity.Otp) return 4;
-            // Hash the new password
-            accountEmp.Password = BCryptHandler.HashPassword(entity.NewPassword);
-            accountEmp.IsUsed = true;
-            await _accountRepository.UpdateAsync(accountEmp);
-            await _accountRepository.ChangeTrackingAsync();
-            return 1;
-        }
-        public async Task<int> RegisterAsync(RegisterDto entity)
-        {
-            await using var transaction = await _accountRepository.BeginTransactionAsync();
-            try
-            {
-                var employee = _mapper.Map<Employee>(entity);
-                await _employeeRepository.CreateAsync(employee);
-                await _employeeRepository.ChangeTrackingAsync();
+            var role = await _roleRepository.GetByNameAsync("employee");
 
-                if (entity.Password != entity.ConfirmPassword) return 0;
+            if (role == null) return -1; // Role not found 
 
-                var accountEmp = _mapper.Map<Account>(entity);
-                accountEmp.Id = employee.Id;
-                await _accountRepository.CreateAsync(accountEmp);
-                await _accountRepository.ChangeTrackingAsync();
+            var accountRole = new AccountRole {
+                AccountId = accountResult.Id,
+                RoleId = role.Id
+            };
 
-                var role = await _roleRepository.GetGuidbyRole("employee");
-                if (role == null) return 2;
-                await _roleRepository.ChangeTrackingAsync();
-
-                var accRoleEmp = new AccountRole
-                {
-                    AccountId = accountEmp.Id,
-                    RoleId = role.Id
-                };
-                await _accountRoleRepository.CreateAsync(accRoleEmp);
-                await _accountRoleRepository.ChangeTrackingAsync();
-
-                await transaction.CommitAsync();
-                return 1; // success
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw; // failed insert into tabel
-            }
-            
-        }
-        public async Task<int> AddAccountRoleAsync(AddAccountRoleRequestDto addAccountRoleRequestDto)
-        {
-            var account = await _accountRepository.GetByIdAsync(addAccountRoleRequestDto.AccountId);
-
-            if (account == null)
-            {
-                return 0; // Account not found
-            }
-            var role = await _roleRepository.GetByIdAsync(addAccountRoleRequestDto.RoleId);
-            if (role == null)
-            {
-                return -1; // Account not found
-            }
-            var accountRole = _mapper.Map<AccountRole>(addAccountRoleRequestDto);
             await _accountRoleRepository.CreateAsync(accountRole);
+            await transaction.CommitAsync();
             return 1; // success
         }
-
-        public async Task<int> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto)
+        catch
         {
-            var accountRole = await _accountRoleRepository.GetDataByAccountIdAndRoleAsync(removeAccountRoleRequestDto.AccountId, removeAccountRoleRequestDto.RoleId);
-
-            if (accountRole == null)
-            {
-                return 0; // Account or Role not found
-            }
-
-            await _accountRoleRepository.DeleteAsync(accountRole);
-
-            return 1; // success
+            await transaction.RollbackAsync();
+            throw;
         }
+    }
 
-        public async Task<IEnumerable<AccountResponseDto>?> GetAllAsync()
-        {
-            var data = await _accountRepository.GetAllAsync();
+    public async Task<int> AddAccountRoleAsync(AddAccountRoleRequestDto addAccountRoleRequestDto)
+    {
+        var account = await _accountRepository.GetByIdAsync(addAccountRoleRequestDto.AccountId);
 
-            var dataMap = _mapper.Map<IEnumerable<AccountResponseDto>>(data);
+        if (account == null) return 0; // Account not found
 
-            return dataMap; // success
+        var role = await _roleRepository.GetByIdAsync(addAccountRoleRequestDto.RoleId);
 
-        }
+        if (role == null) return -1; // Account not found
 
-        public async Task<AccountResponseDto?> GetByIdAsync(Guid id)
-        {
-            var account = await _accountRepository.GetByIdAsync(id);
+        var accountRole = _mapper.Map<AccountRole>(addAccountRoleRequestDto);
 
-            if (account == null)
-            {
-                return null; // not found
-            }
+        await _accountRoleRepository.CreateAsync(accountRole);
 
-            var dataMap = _mapper.Map<AccountResponseDto>(account);
+        return 1; // success
+    }
 
-            return dataMap; // success
-        }
+    public async Task<int> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto)
+    {
+        var accountRole =
+            await _accountRoleRepository.GetDataByAccountIdAndRoleAsync(removeAccountRoleRequestDto.AccountId,
+                                                                        removeAccountRoleRequestDto.RoleId);
 
-        public async Task<int> CreateAsync(AccountRequestDto accountRequestDto)
-        {
+        if (accountRole == null) return 0; // Account or Role not found
 
-            var account = _mapper.Map<Account>(accountRequestDto);
+        await _accountRoleRepository.DeleteAsync(accountRole);
 
-            await _accountRepository.CreateAsync(account);
+        return 1; // success
+    }
 
-            return 1; // success
-        }
+    public async Task<IEnumerable<AccountResponseDto>?> GetAllAsync()
+    {
+        var data = await _accountRepository.GetAllAsync();
 
-        public async Task<int> UpdateAsync(Guid id, AccountRequestDto entity)
-        {
+        var dataMap = _mapper.Map<IEnumerable<AccountResponseDto>>(data);
 
-            var data = await _accountRepository.GetByIdAsync(id);
-            if (data is null)
-            {
-                return 0;
-            }
-            var account = _mapper.Map<Account>(entity);
-            account.Id = id;
-            await _accountRepository.UpdateAsync(account);
-            return 1;
-        }
+        return dataMap; // success
+    }
 
-        public async Task<int> DeleteAsync(Guid id)
-        {
-            var data = await _accountRepository.GetByIdAsync(id);
-            if (data is null)
-            {
-                return 0;
-            }
-            await _accountRepository.DeleteAsync(data);
-            return 1;
-        }
+    public async Task<AccountResponseDto?> GetByIdAsync(Guid id)
+    {
+        var account = await _accountRepository.GetByIdAsync(id);
 
+        if (account == null) return null; // not found
+
+        var dataMap = _mapper.Map<AccountResponseDto>(account);
+
+        return dataMap; // success
+    }
+
+    public async Task<int> CreateAsync(AccountRequestDto accountRequestDto)
+    {
+        var account = _mapper.Map<Account>(accountRequestDto);
+
+        await _accountRepository.CreateAsync(account);
+
+        return 1; // success
+    }
+
+    public async Task<int> UpdateAsync(Guid id, AccountRequestDto accountRequestDto)
+    {
+        var data = await _accountRepository.GetByIdAsync(id);
+        await _accountRepository.ChangeTrackingAsync();
+        if (data == null) return 0; // not found
+
+        var account = _mapper.Map<Account>(accountRequestDto);
+
+        account.Id = id;
+        await _accountRepository.UpdateAsync(account);
+
+        return 1; // success
+    }
+
+    public async Task<int> DeleteAsync(Guid id)
+    {
+        var data = await _accountRepository.GetByIdAsync(id);
+
+        if (data == null) return 0; // not found
+
+        await _accountRepository.DeleteAsync(data);
+
+        return 1; // success
     }
 }

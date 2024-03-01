@@ -7,5 +7,6 @@ namespace API.Repositories.Interfaces
     {
         Task<Employee?> GetByNikAsync(string nik);
         Task<Employee?> GetByEmailAsync(string email);
+        Task<string?> GetLastNikAsync();
     }
 }

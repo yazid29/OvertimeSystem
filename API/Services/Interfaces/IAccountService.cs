@@ -1,19 +1,18 @@
-﻿using API.DTOs.Accounts;
+using API.DTOs.Accounts;
 
-namespace API.Services.Interfaces
+namespace API.Services.Interfaces;
+
+public interface IAccountService
 {
-    public interface IAccountService
-    {
-        Task<int> LoginAsync(LoginDto entity);
-        Task<int> ForgotPasswordAsync(ForgotPasswordDto entity);
-        Task<int> ChangePasswordAsync(ChangePasswordRequestDto entity);
-        Task<int> RegisterAsync(RegisterDto entity);
-        Task<int> AddAccountRoleAsync(AddAccountRoleRequestDto addAccountRoleRequestDto);
-        Task<int> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto);
-        Task<IEnumerable<AccountResponseDto>?> GetAllAsync();
-        Task<AccountResponseDto?> GetByIdAsync(Guid id);
-        Task<int> CreateAsync(AccountRequestDto entity);
-        Task<int> UpdateAsync(Guid id, AccountRequestDto entity);
-        Task<int> DeleteAsync(Guid id);
-    }
+    Task<int> ResetPasswordAsync(ResetPasswordRequestDto resetPasswordRequestDto);
+    Task<int> SendOtpAsync(string email);
+    Task<LoginResponseDto?> LoginAsync(LoginRequestDto loginRequestDto);
+    Task<int> RegisterAsync(RegisterDto registerDto);
+    Task<int> AddAccountRoleAsync(AddAccountRoleRequestDto addAccountRoleRequestDto);
+    Task<int> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto);
+    Task<IEnumerable<AccountResponseDto>?> GetAllAsync();
+    Task<AccountResponseDto?> GetByIdAsync(Guid id);
+    Task<int> CreateAsync(AccountRequestDto accountRequestDto);
+    Task<int> UpdateAsync(Guid id, AccountRequestDto accountRequestDto);
+    Task<int> DeleteAsync(Guid id);
 }
