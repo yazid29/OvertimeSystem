@@ -3,9 +3,13 @@ using API.Repositories.Data;
 using API.Repositories.Interfaces;
 using API.Services;
 using API.Services.Interfaces;
+using API.Utilities.Handlers;
 using API.Utilities.Middlewares;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +25,13 @@ builder.Services.AddTransient<ErrorHandlingMiddleware>();
 // Add Automapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
+// Add emal handler
+builder.Services.AddTransient<IEmailHandler, EmailHandler>(x =>
+    new EmailHandler(builder.Configuration["EmailSettings:SmtpServer"],
+                        int.Parse(builder.Configuration["EmailSettings:SmtpPort"]),
+                        builder.Configuration["EmailSettings:Username"],
+                        builder.Configuration["EmailSettings:Password"],
+                        builder.Configuration["EmailSettings:MailFrom"]));
 // Add database Context
 var connectionString = builder.Configuration.GetConnectionString("SqlConnections");
 builder.Services.AddDbContext<OvertimeServiceDbContext>(option =>
@@ -28,6 +39,9 @@ builder.Services.AddDbContext<OvertimeServiceDbContext>(option =>
     option.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
     option.UseLazyLoadingProxies();
 });
+// Add FluentValidation Services
+builder.Services.AddFluentValidationAutoValidation()
+    .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
 // Add repository to the container
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();

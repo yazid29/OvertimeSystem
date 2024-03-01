@@ -5,6 +5,8 @@ namespace API.Services.Interfaces
     public interface IAccountService
     {
         Task<int> LoginAsync(LoginDto entity);
+        Task<int> ForgotPasswordAsync(ForgotPasswordDto entity);
+        Task<int> ChangePasswordAsync(ChangePasswordRequestDto entity);
         Task<int> RegisterAsync(RegisterDto entity);
         Task<int> AddAccountRoleAsync(AddAccountRoleRequestDto addAccountRoleRequestDto);
         Task<int> RemoveRoleAsync(RemoveAccountRoleRequestDto removeAccountRoleRequestDto);

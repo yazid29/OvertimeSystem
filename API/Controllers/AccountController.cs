@@ -3,9 +3,12 @@ using API.Repositories.Interfaces;
 using API.Services.Interfaces;
 using API.Utilities.Handlers;
 using API.Utilities.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
+
+[Authorize]
 [ApiController]
 [Route("account")]
 public class AccountController : ControllerBase
@@ -24,20 +27,65 @@ public class AccountController : ControllerBase
 
         if (result == 0)
         {
-            BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
                                                   HttpStatusCode.BadRequest.ToString(),
-                                                  "Password Not Match"
-                                                 ));
-        }else if (result == 2)
-        {
-            BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
-                                                  HttpStatusCode.BadRequest.ToString(),
-                                                  "Email tidak ada"
+                                                  "Email or Password Do Not Match"
                                                  ));
         }
         return Ok(new MessageResponseVM(StatusCodes.Status200OK,
                                         HttpStatusCode.OK.ToString(),
                                         "Login Success"));
+    }
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordDto entity)
+    {
+        var result = await _aService.ForgotPasswordAsync(entity);
+        
+        if (result == 0)
+        {
+            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "Email Not Found"
+                                                 ));
+        }
+        return Ok(new SingleResponseVM<ForgotPasswordResponseDto>(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "Code OTP Has Been Sent",new ForgotPasswordResponseDto(result)));
+    }
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePasswordAsync(ChangePasswordRequestDto entity)
+    {
+        var result = await _aService.ChangePasswordAsync(entity);
+        if (result == 0)
+        {
+            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "Email or Password Do Not Match"
+                                                 ));
+        }
+        else if (result == 2)
+        {
+            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "OTP Code Has Been Used"
+                                                 ));
+        }else if (result == 3)
+        {
+            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "OTP Code Has Been Expired"
+                                                 ));
+        }
+        else if (result == 4)
+        {
+            return BadRequest(new MessageResponseVM(StatusCodes.Status400BadRequest,
+                                                  HttpStatusCode.BadRequest.ToString(),
+                                                  "Incorrect OTP"
+                                                 ));
+        }
+        return Ok(new MessageResponseVM(StatusCodes.Status200OK,
+                                        HttpStatusCode.OK.ToString(),
+                                        "New Password Has Been Created"));
     }
     [HttpPost("register")]
     public async Task<IActionResult> RegisterAsync(RegisterDto entity)

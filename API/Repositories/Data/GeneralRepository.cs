@@ -2,6 +2,7 @@ using API.Contracts;
 using API.Data;
 using API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace API.Repositories;
 
@@ -17,6 +18,10 @@ public class GeneralRepository<TEntity> : IGeneralRepository<TEntity> where TEnt
     //{
     //    return _context;
     //}
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
+    {
+        return await _context.Database.BeginTransactionAsync();
+    }
     public async Task<IEnumerable<TEntity>> GetAllAsync()
     {
         return await _context.Set<TEntity>().ToListAsync();
